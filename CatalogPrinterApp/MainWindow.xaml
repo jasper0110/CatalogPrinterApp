@@ -11,7 +11,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="48" />
             <RowDefinition Height="1" />
-            <RowDefinition/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
             <Grid Grid.Row="0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0" Height="40">
@@ -40,15 +42,35 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Grid Grid.Column="2" Name="LocalLoginGrid" Visibility="Visible" Width="380">
+                    <Grid Grid.ColumnSpan="3" Name="LocalLoginGrid" Visibility="Visible">
                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                             <Label Content="Local Login" Margin="0,4,0,12" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="26"></Label>
-
                             <ProgressBar x:Name="LocalMetroProgressBar" Visibility="Visible" Height="16" Margin="0,4,0,8" HorizontalAlignment="Center"  Width="220" Background="Transparent" BorderBrush="{StaticResource ThemeColorBrush}" Foreground="{DynamicResource ThemeColorBrush}" BorderThickness="1" IsIndeterminate="False"/>
-
-                             <Button Name="LocalLoginButton" Content="Login" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
-                        </StackPanel>
+                            <Button Name="LocalLoginButton" Content="Login" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
+                        </StackPanel>                        
                     </Grid>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="3" Name="InputGridCatalogType" Visibility="Visible" Width="Auto">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+                        <Label Content="Catalog Type" Width="200" Margin="10,5,10,10" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20"></Label>
+                        <Label Content="Selectie Tarieven" Width="200" Margin="10,5,10,10" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20"></Label>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Column="1">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
+                        <TextBox Width="200" Margin="10,5,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight"/>
+                        <ComboBox Width="200" Margin="10,5,10,10" FontFamily="Segoe UI Semilight" FontSize="20" HorizontalContentAlignment="Center" HorizontalAlignment="Right">
+                            <ComboBoxItem Content="Particulier" IsSelected="True"/>
+                            <ComboBoxItem Content="Dakwerker"/>
+                            <ComboBoxItem Content="Veranda"/>
+                        </ComboBox>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </Grid>
