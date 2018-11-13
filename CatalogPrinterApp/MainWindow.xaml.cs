@@ -37,7 +37,7 @@ namespace CatalogPrinterApp
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
             startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = @"C:\temp\EncryptorApp.exe";
+            startInfo.FileName = @"C:\ProgramData\CatalogPrinterApp\EncryptorApp.exe";
             startInfo.Verb = "runas";
 
             try

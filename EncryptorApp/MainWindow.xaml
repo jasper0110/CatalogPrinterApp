@@ -27,7 +27,7 @@
             <Thumb Grid.Row="0" Grid.ColumnSpan="2" Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
             <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
                 <StackPanel Style="{StaticResource DataWindowCloseButtonStackPanelStyle}">
-                    <Button ToolTip="Close" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="ButtonClose_OnClick">
+                    <Button ToolTip="Close" Width="32" Height="28" Style="{StaticResource WindowActionButtonClose}" Click="ButtonClose_OnClick">
                         <Path Width="10" Height="10" Stretch="Fill" Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
                     </Button>
                 </StackPanel>

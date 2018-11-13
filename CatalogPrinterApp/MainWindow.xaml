@@ -22,7 +22,7 @@
                 <Thumb Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0">
                     <Button ToolTip="Settings" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Settings_OnClick">
-                        <Image Source="../Icons/gears.png" Height="20" Width="20" Style="{StaticResource UserControlImageStyle}" ></Image>
+                        <Image Source="gears.png" Height="20" Width="20" Style="{StaticResource UserControlImageStyle}" ></Image>
                     </Button>
                     <Button ToolTip="Minimize" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Minimize_OnClick">
                         <Rectangle Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" Margin="0,16,1,2" Width="9" Height="2" VerticalAlignment="Bottom" d:LayoutOverrides="Height"/>
