@@ -5,21 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight" SnapsToDevicePixels="True"
-        Background="White" AllowsTransparency="True" WindowStyle="None" ResizeMode="NoResize">
+        Background="White" AllowsTransparency="True" WindowStyle="None" ResizeMode="CanResizeWithGrip" MinHeight="100" MinWidth="400">
     <Border Style="{StaticResource CoreBorderStyle}">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="48" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="1" />
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0" Height="40">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0" Grid.ColumnSpan="2">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="8,0,0,0" Height="50">
                     <Path Width="19.5" Height="28.5" Margin="20,0,12,0" Stretch="Fill" HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource ThemeColorBrush}" Data="F1 M 25,27L 46,19L 46,22.25L 28.5,29L 31.75,31.25L 51,23.75L 51,48.5L 31.75,57L 25,52L 25,27 Z "/>
                     <!--<Image Source="/Ruby;component/Backend/Icons/32x32/Normal/asset-banknote.png" Style="{StaticResource UserControlImageStyle}" ></Image>-->
-                    <TextBlock Foreground="{StaticResource ThemeColorBrush}" Text="Catalog Printer" FontSize="20" Margin="8,2,0,0" FontWeight="Normal" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe WP" />
+                    <TextBlock Margin="10,10,200,10" Foreground="{StaticResource ThemeColorBrush}" Text="Catalog Printer" FontSize="20" FontWeight="Normal" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe WP" />
                 </StackPanel>
                 <Thumb Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0">
@@ -34,45 +38,18 @@
                     </Button>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="1" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
-            <Grid Grid.Row="2">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid Grid.ColumnSpan="3" Name="LocalLoginGrid" Visibility="Visible">
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                            <Label Content="Local Login" Margin="0,4,0,12" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="26"></Label>
-                            <ProgressBar x:Name="LocalMetroProgressBar" Visibility="Visible" Height="16" Margin="0,4,0,8" HorizontalAlignment="Center"  Width="220" Background="Transparent" BorderBrush="{StaticResource ThemeColorBrush}" Foreground="{DynamicResource ThemeColorBrush}" BorderThickness="1" IsIndeterminate="False"/>
-                            <Button Name="LocalLoginButton" Content="Login" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
-                        </StackPanel>                        
-                    </Grid>
-                </Grid>
-            </Grid>
-            <Grid Grid.Row="3" Name="InputGridCatalogType" Visibility="Visible" Width="Auto">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
-                        <Label Content="Catalog Type" Width="200" Margin="10,5,10,10" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20"></Label>
-                        <Label Content="Selectie Tarieven" Width="200" Margin="10,5,10,10" HorizontalAlignment="Center" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20"></Label>
-                    </StackPanel>
-                </Grid>
-                <Grid Grid.Column="1">
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Right">
-                        <TextBox Width="200" Margin="10,5,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight"/>
-                        <ComboBox Width="200" Margin="10,5,10,10" FontFamily="Segoe UI Semilight" FontSize="20" HorizontalContentAlignment="Center" HorizontalAlignment="Right">
-                            <ComboBoxItem Content="Particulier" IsSelected="True"/>
-                            <ComboBoxItem Content="Dakwerker"/>
-                            <ComboBoxItem Content="Veranda"/>
-                        </ComboBox>
-                    </StackPanel>
-                </Grid>
-            </Grid>
+            <Grid Grid.Row="1" Grid.ColumnSpan="2" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
+            <Grid Grid.Row="2" Visibility="Visible" Width="Auto"></Grid>
+                <Label Grid.Row="2"  Grid.Column="0" MinHeight="30" MinWidth="200" Content="Catalog Type" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"></Label>
+                <ComboBox Grid.Row="2" Grid.Column="1" MinWidth="200" Width="200" Margin="10,10,10,10" FontFamily="Segoe UI Semilight" FontSize="20" HorizontalContentAlignment="Center" HorizontalAlignment="Right" VerticalContentAlignment="Center" VerticalAlignment="Top">
+                    <ComboBoxItem Content="Particulier" IsSelected="True"/>
+                    <ComboBoxItem Content="Dakwerker"/>
+                    <ComboBoxItem Content="Veranda"/>
+                </ComboBox>
+
+            <Grid Grid.Row="3" Visibility="Visible" Width="Auto"></Grid>
+            <Label Grid.Row="3" Grid.Column="0" MinHeight="30" Content="Selectie Tarieven" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"></Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top"/>
         </Grid>
     </Border>
 </Window>
