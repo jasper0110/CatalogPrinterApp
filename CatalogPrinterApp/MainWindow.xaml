@@ -19,19 +19,19 @@
                     <!--<Image Source="/Ruby;component/Backend/Icons/32x32/Normal/asset-banknote.png" Style="{StaticResource UserControlImageStyle}" ></Image>-->
                     <TextBlock Foreground="{StaticResource ThemeColorBrush}" Text="Catalog Printer" FontSize="20" Margin="8,2,0,0" FontWeight="Normal" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Segoe WP" />
                 </StackPanel>
+                <Thumb Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0">
-                    <Button ToolTip="System Information" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="BtnActionSystemInformation_OnClick">
+                    <Button ToolTip="Settings" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Settings_OnClick">
                         <Image Source="../Icons/gears.png" Height="20" Width="20" Style="{StaticResource UserControlImageStyle}" ></Image>
                     </Button>
-                    <Button ToolTip="Minimize" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="BtnActionMinimize_OnClick">
+                    <Button ToolTip="Minimize" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Minimize_OnClick">
                         <Rectangle Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" Margin="0,16,1,2" Width="9" Height="2" VerticalAlignment="Bottom" d:LayoutOverrides="Height"/>
                     </Button>
-                    <Button ToolTip="Close" Width="32" Height="28" Style="{StaticResource WindowActionButtonClose}" Click="btnActionClose_Click">
+                    <Button ToolTip="Close" Width="32" Height="28" Style="{StaticResource WindowActionButtonClose}" Click="Close_Click">
                         <Path Width="10" Height="10" Stretch="Fill" Fill="{Binding Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Button}}" Data="F1 M 26.9166,22.1667L 37.9999,33.25L 49.0832,22.1668L 53.8332,26.9168L 42.7499,38L 53.8332,49.0834L 49.0833,53.8334L 37.9999,42.75L 26.9166,53.8334L 22.1666,49.0833L 33.25,38L 22.1667,26.9167L 26.9166,22.1667 Z "/>
                     </Button>
                 </StackPanel>
             </Grid>
-            <Thumb Grid.Row="0" Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
             <Grid Grid.Row="1" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
             <Grid Grid.Row="2">
                 <Grid>

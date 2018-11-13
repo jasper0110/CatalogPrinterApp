@@ -27,12 +27,12 @@ namespace CatalogPrinterApp
             InitializeComponent();
         }
 
-        private void BtnActionMinimize_OnClick(object sender, RoutedEventArgs e)
+        private void Minimize_OnClick(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }
 
-        private void BtnActionSystemInformation_OnClick(object sender, RoutedEventArgs e)
+        private void Settings_OnClick(object sender, RoutedEventArgs e)
         {
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
@@ -56,7 +56,7 @@ namespace CatalogPrinterApp
             Top = Top + e.VerticalChange;
         }
 
-        private void btnActionClose_Click(object sender, RoutedEventArgs e)
+        private void Close_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
         }
