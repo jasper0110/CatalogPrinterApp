@@ -1,0 +1,16 @@
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.csprojResolveAssemblyReference.cache
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\MainWindow.baml
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\Styles\ResourceDictionary.baml
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\MainWindow.g.cs
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\App.g.cs
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp_MarkupCompile.cache
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp_MarkupCompile.lref
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\bin\Debug\CatalogPrinterApp.exe.config
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\bin\Debug\CatalogPrinterApp.exe
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\bin\Debug\CatalogPrinterApp.pdb
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\App.baml
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.g.resources
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.Properties.Resources.resources
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.csproj.GenerateResource.Cache
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.exe
+c:\users\jasper\documents\visual studio 2017\Projects\CatalogPrinterApp\CatalogPrinterApp\obj\Debug\CatalogPrinterApp.pdb

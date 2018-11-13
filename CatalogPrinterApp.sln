@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogPrinterApp", "CatalogPrinterApp\CatalogPrinterApp.csproj", "{F1D2E117-155E-4B11-A944-902E74F29367}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncryptorApp", "EncryptorApp\EncryptorApp.csproj", "{67A622FD-CD58-4B45-A58A-07F1D4BF103B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2B8F9F1-6AB1-47F0-8480-814E9F3FB25D}"
+	ProjectSection(SolutionItems) = preProject
+		CatalogPrinterApp.config = CatalogPrinterApp.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelUtil", "ExcelUtil\ExcelUtil.csproj", "{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLUtil", "XMLUtil\XMLUtil.csproj", "{84944186-6E98-4A10-905D-3B5DCDC6A7C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encrypter", "Encrypter\Encrypter.csproj", "{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1D2E117-155E-4B11-A944-902E74F29367}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1D2E117-155E-4B11-A944-902E74F29367}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1D2E117-155E-4B11-A944-902E74F29367}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1D2E117-155E-4B11-A944-902E74F29367}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67A622FD-CD58-4B45-A58A-07F1D4BF103B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67A622FD-CD58-4B45-A58A-07F1D4BF103B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67A622FD-CD58-4B45-A58A-07F1D4BF103B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67A622FD-CD58-4B45-A58A-07F1D4BF103B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84944186-6E98-4A10-905D-3B5DCDC6A7C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84944186-6E98-4A10-905D-3B5DCDC6A7C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84944186-6E98-4A10-905D-3B5DCDC6A7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84944186-6E98-4A10-905D-3B5DCDC6A7C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

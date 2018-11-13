@@ -1,0 +1,5 @@
+C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\bin\Release\XMLUtil.dll
+C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\bin\Release\XMLUtil.pdb
+C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Release\XMLUtil.dll
+C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Release\XMLUtil.pdb
+C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Release\XMLUtil.csprojResolveAssemblyReference.cache
