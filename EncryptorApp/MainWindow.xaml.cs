@@ -68,7 +68,7 @@ namespace EncryptorApp
             }
         }
 
-        private void ChangePassword_OnClick(object sender, RoutedEventArgs e)
+        private async void ChangePassword_OnClick(object sender, RoutedEventArgs e)
         {
             string firstPassword = NewPasswordTextBox.Password;
             string secondPassword = ConfirmNewPasswordTextBox.Password;
@@ -99,11 +99,15 @@ namespace EncryptorApp
                 if (!File.Exists(masterCatalog))
                     throw new Exception($"Workbook " + masterCatalog + " not found!");
                 string oldPassword = HashUtil.Decrypt(oldHash);
-                ExcelUtility.ChangePassword(masterCatalog, oldPassword, firstPassword);
+                await Task.Run(() => ExcelUtility.ChangePassword(masterCatalog, oldPassword, firstPassword));
 
                 // write new encrypted password to config
                 appSettings.Settings["key"].Value = encryptedPassword;
                 config.Save(ConfigurationSaveMode.Modified);
+
+                GetPasswordTextBox.Clear();
+                NewPasswordTextBox.Clear();
+                ConfirmNewPasswordTextBox.Clear();
 
                 MessageBox.Show("Password changed!");
 
