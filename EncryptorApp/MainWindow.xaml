@@ -51,7 +51,7 @@
                         <Grid Margin="0,0,0,8">
                             <TextBox Name="GetPasswordTextBox" CharacterCasing="Lower" TabIndex="4" Text="" />
                         </Grid>
-                        <Button Name="GetPasswordButton" Content="Get Password" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
+                        <Button Name="GetPasswordButton" Click="GetPassword_OnClick" Content="Get Password" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
                     </StackPanel>
                 </Grid>
             </Grid>

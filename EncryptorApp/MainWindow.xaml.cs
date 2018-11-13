@@ -41,6 +41,33 @@ namespace EncryptorApp
             Application.Current.Shutdown();
         }
 
+        private void GetPassword_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // open config
+                string configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
+                if (!File.Exists(configPath))
+                    throw new Exception($"Config file " + configPath + " not found!");
+                ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+                configMap.ExeConfigFilename = configPath;
+                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+                var appSettings = config.GetSection("appSettings") as AppSettingsSection;
+                // get config values
+                string oldHash = appSettings.Settings["key"].Value;
+
+                // decrypt password
+                string oldPassword = HashUtil.Decrypt(oldHash);
+
+                GetPasswordTextBox.Text = oldPassword;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                MessageBox.Show("Error! Could not get the password!");
+            }
+        }
+
         private void ChangePassword_OnClick(object sender, RoutedEventArgs e)
         {
             string firstPassword = NewPasswordTextBox.Password;
