@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:EncryptorApp"
         mc:Ignorable="d"
         Title="MainWindow" SizeToContent="WidthAndHeight" SnapsToDevicePixels="True" MinWidth="400"
-        AllowsTransparency="True" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen">
     <Border Style="{StaticResource CoreBorderStyle}">
         <Grid>
             <Grid.RowDefinitions>
@@ -33,23 +33,23 @@
                 </StackPanel>
             </DockPanel>
             <Grid Grid.Row="1" Grid.Column="0">
-                <Grid Name="ChangePasswordGrid" Visibility="Visible" Width="380">
+                <Grid Name="ChangePasswordGrid" Visibility="Visible" Width="Auto" Margin="10,10,10,10">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Grid Margin="0,0,0,8">
-                            <PasswordBox Name="NewPasswordTextBox" TabIndex="4" local:PasswordBoxBehavior.Watermark="Enter Password..." />
+                            <PasswordBox Name="NewPasswordTextBox" TabIndex="4" local:WaterMarkTextHelper.WatermarkText="new password"/>
                         </Grid>
                         <Grid Margin="0,0,0,8">
-                            <PasswordBox Name="ConfirmNewPasswordTextBox" TabIndex="4" />
+                            <PasswordBox Name="ConfirmNewPasswordTextBox" TabIndex="4" local:WaterMarkTextHelper.WatermarkText="confirm password"/>
                         </Grid>
                         <Button Name="ChangePasswordButton" Content="Change Password" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" Click="ChangePassword_OnClick" />
                     </StackPanel>
                 </Grid>
             </Grid>
             <Grid Grid.Row="1" Grid.Column="1">
-                <Grid Name="GetPasswordGrid" Visibility="Visible" Width="380">
+                <Grid Name="GetPasswordGrid" Visibility="Visible" Width="Auto" Margin="10,10,10,10">
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Grid Margin="0,0,0,8">
-                            <TextBox Style="{StaticResource LoginTextBoxStyle}" Name="GetPasswordTextBox" CharacterCasing="Lower" TabIndex="4" Text="" />
+                            <TextBox Name="GetPasswordTextBox" CharacterCasing="Lower" TabIndex="4" Text="" />
                         </Grid>
                         <Button Name="GetPasswordButton" Content="Get Password" Width="220" Height="36" Margin="0,0,0,32" TabIndex="8" />
                     </StackPanel>
