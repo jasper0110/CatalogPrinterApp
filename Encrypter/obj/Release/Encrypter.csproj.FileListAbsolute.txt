@@ -1,5 +1,0 @@
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\Encrypter\bin\Release\Encrypter.dll
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\Encrypter\bin\Release\Encrypter.pdb
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\Encrypter\obj\Release\Encrypter.dll
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\Encrypter\obj\Release\Encrypter.pdb
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\Encrypter\obj\Release\Encrypter.csprojResolveAssemblyReference.cache

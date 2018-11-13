@@ -1,5 +1,0 @@
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\bin\Debug\XMLUtil.dll
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\bin\Debug\XMLUtil.pdb
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Debug\XMLUtil.dll
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Debug\XMLUtil.pdb
-C:\Users\Jasper\Documents\Visual Studio 2017\Projects\CatalogPrinter\XMLUtil\obj\Debug\XMLUtil.csprojResolveAssemblyReference.cache
