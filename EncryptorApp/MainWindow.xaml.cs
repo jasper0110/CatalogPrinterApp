@@ -25,6 +25,8 @@ namespace EncryptorApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly string _configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -46,11 +48,10 @@ namespace EncryptorApp
             try
             {
                 // open config
-                string configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
-                if (!File.Exists(configPath))
-                    throw new Exception($"Config file " + configPath + " not found!");
+                if (!File.Exists(_configPath))
+                    throw new Exception($"Config file " + _configPath + " not found!");
                 ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-                configMap.ExeConfigFilename = configPath;
+                configMap.ExeConfigFilename = _configPath;
                 Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
                 var appSettings = config.GetSection("appSettings") as AppSettingsSection;
                 // get config values

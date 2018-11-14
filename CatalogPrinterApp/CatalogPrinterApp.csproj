@@ -101,5 +101,15 @@
   <ItemGroup>
     <Resource Include="gears.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Encrypter\Encrypter.csproj">
+      <Project>{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}</Project>
+      <Name>Encrypter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ExcelUtil\ExcelUtil.csproj">
+      <Project>{EEE0E1FA-5CC5-4AE4-98E2-3697DFC05D24}</Project>
+      <Name>ExcelUtil</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -49,6 +49,9 @@
                     <ComboBoxItem Content="Particulier" IsSelected="True"/>
                     <ComboBoxItem Content="Dakwerker"/>
                     <ComboBoxItem Content="Veranda"/>
+                    <ComboBoxItem Content="Aannemer"/>
+                    <ComboBoxItem Content="Stock"/>
+                    <ComboBoxItem Content="Blanco"/>
                 </ComboBox>
             <Grid Grid.Row="3" Visibility="Visible" Width="Auto"></Grid>
             <Label Grid.Row="3" Grid.Column="0" MinHeight="30" Content="Selectie Tarieven" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"/>
