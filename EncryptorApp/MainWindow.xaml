@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EncryptorApp"
         mc:Ignorable="d"
-        Title="MainWindow" SizeToContent="WidthAndHeight" SnapsToDevicePixels="True" MinWidth="400"
+        Title="MainWindow" SizeToContent="WidthAndHeight" SnapsToDevicePixels="True" MinWidth="400" ResizeMode="NoResize"
         AllowsTransparency="True" WindowStyle="None" WindowStartupLocation="CenterScreen">
     <Border Style="{StaticResource CoreBorderStyle}">
         <Grid>
