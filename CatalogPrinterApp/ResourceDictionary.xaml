@@ -2,14 +2,228 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <SolidColorBrush x:Key="ThemeColorBrush" Color="#2B579A"></SolidColorBrush>
-    <SolidColorBrush x:Key="MainWindowSplitBorderBrush" Color="#CCCCCC"></SolidColorBrush>
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White"/>
+    <SolidColorBrush x:Key="MainWhiteFontColor" Color="#FFFFFF"></SolidColorBrush>
     <SolidColorBrush x:Key="MainBlackFontColor" Color="#444444"></SolidColorBrush>
+    <SolidColorBrush x:Key="MainWindowSplitBorderBrush" Color="#CCCCCC"></SolidColorBrush>
+    <SolidColorBrush x:Key="UserControlButtonIsPressedBrush" Color="#A3BDE3"></SolidColorBrush>
+    <SolidColorBrush x:Key="ManagementColorBrush" Color="#F1A128"></SolidColorBrush>
     <SolidColorBrush x:Key="ControlHeaderBackgroundPressdBrush" Color="#D5E1F2"></SolidColorBrush>
     <SolidColorBrush x:Key="ControlHeaderForegroundPressdBrush" Color="#19478A"></SolidColorBrush>
+    <SolidColorBrush x:Key="UserControlButtonMouseOverBrush" Color="#D5E1F2"></SolidColorBrush>
+    <SolidColorBrush x:Key="DisabledBackgroundBrush" Color="#F6F6F6"></SolidColorBrush>
+    <SolidColorBrush x:Key="NavigationBackgroundColorPressed" Color="#19478A"></SolidColorBrush>
+    <SolidColorBrush x:Key="RequiredBrush" Color="#cc0000"></SolidColorBrush>
 
     <Style TargetType="Border" x:Key="CoreBorderStyle">
         <Setter Property="BorderBrush" Value="{DynamicResource ThemeColorBrush}"></Setter>
         <Setter Property="BorderThickness" Value="1"></Setter>
+    </Style>
+
+    <Style TargetType="ComboBox" x:Key="RubyCombobox">
+        <Setter Property="BorderBrush"
+                    Value="{StaticResource MainBlackFontColor}"></Setter>
+        <Setter Property="BorderThickness"
+                    Value="1"></Setter>
+        <Setter Property="FontFamily"
+                    Value="Segoe UI"></Setter>
+        <Setter Property="Background"
+                    Value="White"></Setter>
+        <Setter Property="MinHeight"
+                    Value="24"></Setter>
+    </Style>    
+    
+    <Style x:Key="ComboboxStyle" TargetType="ComboBox" BasedOn="{StaticResource RubyCombobox}">
+        <Setter Property="VerticalContentAlignment"
+                    Value="Center" />
+        <Setter Property="HorizontalContentAlignment"
+                    Value="Center" />
+        <Setter Property="HorizontalAlignment"
+                    Value="Center"></Setter>
+        <Setter Property="FontSize"
+                    Value="15" />
+        <Setter Property="Foreground"
+                    Value="{StaticResource MainBlackFontColor}" />
+        <Setter Property="Background"
+                    Value="Transparent" />
+        <Setter Property="Height"
+                    Value="36" />
+        <Setter Property="Width"
+                    Value="220" />
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="Foreground"
+                    Value="{DynamicResource MainWhiteFontColor}"></Setter>
+        <Setter Property="BorderBrush"
+                    Value="{DynamicResource ThemeColorBrush}"></Setter>
+        <Setter Property="BorderThickness"
+                    Value="1"></Setter>
+        <Setter Property="MinHeight"
+                    Value="28" />
+        <Setter Property="MinWidth"
+                    Value="100" />
+        <Setter Property="Background"
+                    Value="{DynamicResource ThemeColorBrush}"></Setter>
+        <Setter Property="HorizontalAlignment"
+                    Value="Center"></Setter>
+        <Setter Property="VerticalAlignment"
+                    Value="Center"></Setter>
+        <Setter Property="FontFamily"
+                    Value="Segoe UI"></Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Border x:Name="Background"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Background="{TemplateBinding Background}" />
+                        <Rectangle x:Name="DisabledVisualElement"
+                                       Fill="{DynamicResource ControlsDisabledBrush}"
+                                       IsHitTestVisible="false"
+                                       Opacity="0" />
+                        <ContentPresenter x:Name="contentPresenter"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              OpacityMask="{x:Null}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"
+                                     Value="True">
+                            <Setter Property="Background"
+                                        Value="{DynamicResource NavigationBackgroundColorMouseOver}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed"
+                                     Value="True">
+                            <Setter Property="Background"
+                                        Value="{DynamicResource NavigationBackgroundColorPressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource MainBlackFontColor}"></Setter>
+        <Setter Property="SnapsToDevicePixels" Value="true" />
+        <Setter Property="OverridesDefaultStyle" Value="true" />
+        <Setter Property="Height" Value="24"></Setter>
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource MyFocusVisualStyte}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type CheckBox}">
+                    <BulletDecorator>
+                        <BulletDecorator.Bullet>
+                            <Grid Height="{TemplateBinding Height}" Width="{Binding RelativeSource={RelativeSource Self}, Path=Height, UpdateSourceTrigger=PropertyChanged}"
+                                      MinHeight="24" MinWidth="24" ShowGridLines="False">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="4*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="4*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="1*" />
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="2*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="3*" />
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="4*" />
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="1*" />
+                                    <RowDefinition Height="4*" />
+                                </Grid.RowDefinitions>
+
+                                <Border Name="MainBorder"
+                                            Grid.ColumnSpan="9" Grid.RowSpan="9"
+                                            CornerRadius="4"
+                                            BorderThickness="1"
+                                            Background="Transparent" />
+
+                                <Border Name="InnerBorder"
+                                            Grid.Column="1" Grid.ColumnSpan="5"
+                                            Grid.Row="2" Grid.RowSpan="5"
+                                            BorderThickness="1"
+                                            BorderBrush="Black" />
+
+                                <Path Name="InnerPath"
+                                          Grid.Column="1" Grid.ColumnSpan="5"
+                                          Grid.Row="2" Grid.RowSpan="5"
+                                          Data="M31,5 L19.5,5 19.5,19.5 34.5,19.5 34.5,11.75"
+                                          Stretch="Fill" Stroke="Black"/>
+
+                                <Path Name="CheckMark"
+                                          Grid.Column="2" Grid.ColumnSpan="5"
+                                          Grid.Row="1" Grid.RowSpan="5"
+                                          Opacity="0"
+                                          Data="M9.07743946676476E-09,4.31805768640244L4.68740335877841,8.86361158398516C4.68740335877841,8.86361158398516,16.3281249985376,-2.42451336648723,16.3281249985376,-2.42451336648723L14.0622100581796,-4.77304938341948 4.68740335877846,4.31805791992662 2.22656251699567,1.93164208562579z"
+                                          Fill="{DynamicResource ThemeColorBrush}"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource ThemeColorBrush}" />
+
+                                <Path Name="InderminateMark"
+                                          Grid.Column="3"
+                                          Grid.Row="4"
+                                          Data="M0,4 L1,5 5,1 4,0"
+                                          Opacity="0"
+                                          Stretch="Fill"
+                                          StrokeThickness="0"
+                                          Fill="Black" />
+                            </Grid>
+                        </BulletDecorator.Bullet>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CheckStates">
+                                <VisualState x:Name="Checked">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             Storyboard.TargetName="CheckMark" Duration="0:0:0.2" To="1" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Unchecked" >
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             Storyboard.TargetName="CheckMark" Duration="0:0:0.2" To="0" />
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Indeterminate">
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             Storyboard.TargetName="InderminateMark" Duration="0:0:0.2" To="1" />
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <ContentPresenter Margin="4,0,4,0"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              RecognizesAccessKey="True" />
+                    </BulletDecorator>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="InnerBorder" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="MainBorder" Property="Background" Value="{DynamicResource UserControlButtonIsPressedBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="CheckMark" Property="Fill" Value="#cccccc" />
+                            <Setter TargetName="CheckMark" Property="Stroke" Value="#cccccc" />
+                            <Setter TargetName="InnerPath" Property="Stroke" Value="#cccccc" />
+                            <Setter TargetName="InderminateMark" Property="Fill" Value="#cccccc" />
+                            <Setter TargetName="InnerBorder" Property="BorderBrush" Value="#cccccc" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="WindowActionButton" TargetType="Button">

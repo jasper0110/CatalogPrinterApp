@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,10 +36,21 @@ namespace CatalogPrinterApp
 
         private void Settings_OnClick(object sender, RoutedEventArgs e)
         {
+            // open config
+            string configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
+            if (!File.Exists(configPath))
+                throw new Exception($"Config file " + configPath + " not found!");
+            ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+            configMap.ExeConfigFilename = configPath;
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+            var appSettings = config.GetSection("appSettings") as AppSettingsSection;
+            // get config value
+            string pathEncryptorApp = appSettings.Settings["pathEncryptorApp"].Value;
+
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
             startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = @"C:\ProgramData\CatalogPrinterApp\EncryptorApp.exe";
+            startInfo.FileName = pathEncryptorApp;
             startInfo.Verb = "runas";
 
             try
@@ -59,6 +72,11 @@ namespace CatalogPrinterApp
         private void Close_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private async void PrintButton_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
