@@ -56,6 +56,71 @@ namespace ExcelUtil
             }
         }
 
+        private static List<string> Range2List(string range)
+        {
+            var list = new List<string>();
+
+            var first = range.Substring(0, range.IndexOf("-"));
+            var second = range.Substring(range.IndexOf("-") + 1);
+
+            var firstInt = 0;
+            var secondInt = 0;
+            if (!Int32.TryParse(first, out firstInt))
+                throw new Exception($"Parse exception for sheet input " + first + " from range " + range + "! Please check sheet input.");
+            if (!Int32.TryParse(second, out secondInt))
+                throw new Exception($"Parse exception for sheet input " + second + " from range " + range + "! Please check sheet input.");
+
+            for (int i = firstInt; i <= secondInt; ++i)
+                list.Add(i.ToString());
+
+            return list;
+        }
+
+        private static List<string> MultipleRange2List(string sheetInput)
+        {
+            var sheets2Print = new List<string>();
+
+            var sheets = sheetInput.Split(';').ToList();
+            foreach (var sheet in sheets)
+            {
+                if (sheet.Contains("-"))
+                {
+                    sheets2Print.AddRange(Range2List(sheet));
+                }
+                else
+                {
+                    if (sheet.Length > 0)
+                        sheets2Print.Add(sheet);
+                }
+            }
+            return sheets2Print;
+        }
+
+        private static List<string> GetSheetsFromInputPages(string sheetInput, string firstPage)
+        {
+            var masterWbSheetOrder = new List<string>();
+
+            Worksheet sh = MasterWb.Sheets[firstPage];
+            while(sh != null)
+            {
+                masterWbSheetOrder.Add(sh.Name);
+                sh = sh.Next;
+            }
+
+            var inputPages = MultipleRange2List(sheetInput).Select(s => Int32.Parse(s));
+            int maxIndex = inputPages.Max();
+            if(maxIndex > masterWbSheetOrder.Count)
+                throw new Exception($"Page input " + maxIndex + " not found in " + MasterWb + "! Please check page input.");
+
+            var sheets2Print = new List<string>();
+            foreach(var input in inputPages)
+            {
+                sheets2Print.Add(masterWbSheetOrder[input - 1]);
+            }
+
+            return sheets2Print;
+        }
+
         public static KeyValuePair<int, int> StringRange2Coordinate(string range)
         {
             var column = new string(range.TakeWhile(char.IsUpper).ToArray());
@@ -135,12 +200,12 @@ namespace ExcelUtil
                 // file does not exist
                 return false;
             }
-            catch (IOException)
+            catch (Exception e)
             {
                 //the file is unavailable because it is:
                 //still being written to
                 //or being processed by another thread 
-                return true;
+                throw new Exception("FileInUseException!" , e);
             }
             finally
             {
@@ -150,7 +215,7 @@ namespace ExcelUtil
             return false;
         }
 
-        public static void ExportWorkbook2Pdf(string wbName, string password, string catalogType, string outputPath, List<string> sheetOrder, InputRanges ranges)
+        public static void ExportWorkbook2Pdf(string wbName, string password, string catalogType, string outputPath, string sheetInput, bool transform2SheetNames, string firstPage, InputRanges ranges)
         {
             try
             { 
@@ -187,6 +252,13 @@ namespace ExcelUtil
                 var cellCatalogType = StringRange2Coordinate(ranges.catalogType);
                 var cellBtw = StringRange2Coordinate(ranges.btw);
 
+                // get sheet order
+                var sheetOrder = new List<string>();
+                if (transform2SheetNames)
+                    sheetOrder = GetSheetsFromInputPages(sheetInput, firstPage);
+                else
+                    sheetOrder = MultipleRange2List(sheetInput);
+
                 // copy necessary sheets to temp workbook and put sheets in correct order
                 foreach (var shName in sheetOrder)
                 {
@@ -194,8 +266,8 @@ namespace ExcelUtil
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
                     // set catalog type
-                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogType;
-
+                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogType.ToUpper();
+                        
                     leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "null";
                     centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "null";
                     rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "null";
@@ -211,13 +283,18 @@ namespace ExcelUtil
                     {
                         //SetBtwField(Workbook.Sheets[shName], true);
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "ja";
+                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "JA";
                         //SetBtwField(Workbook.Sheets[shName], false);
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "neen";
+                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
                     }
                     else
                     {
+                        //var from = MasterWb.Sheets[shName].Range(ranges.printArea);
+                        //Wb2Print.Sheets.Add(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+                        //var to = Wb2Print.Sheets[Wb2Print.Sheets.Count].Range(ranges.printArea);
+                        //from.Copy(to);
+
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
                     }
                 }
@@ -228,7 +305,7 @@ namespace ExcelUtil
 
                 // format and print sheets
                 string outputFile = outputPath + @"\catalog.pdf";
-                if (ExcelUtility.IsFileInUse(outputFile))
+                if (File.Exists(outputFile) && ExcelUtility.IsFileInUse(outputFile))
                     throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
                 foreach (Worksheet sh in Wb2Print.Worksheets)
                     FormatSheet(sh, leftHeader, centerHeader, rightHeader, leftFooter, rightFooter, ranges.printArea);

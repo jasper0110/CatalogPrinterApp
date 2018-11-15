@@ -25,7 +25,7 @@ namespace EncryptorApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly string _configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
+        private readonly string _configPath = @"C:\ProgramData\CatalogPrinter\CatalogPrinterApp.config";
 
         public MainWindow()
         {

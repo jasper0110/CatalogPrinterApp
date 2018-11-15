@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +27,7 @@ namespace CatalogPrinterApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly string _configPath = @"C:\ProgramData\CatalogPrinterApp\CatalogPrinterApp.config";
+        private readonly string _configPath = @"C:\ProgramData\CatalogPrinter\CatalogPrinterApp.config";
 
         public MainWindow()
         {
@@ -77,36 +78,7 @@ namespace CatalogPrinterApp
             Application.Current.Shutdown();
         }
 
-        private List<string> GetSheetOrder()
-        {
-            var sheets2Print = new List<string>();
 
-            var sheets = InputTarief.Text.Split(';').ToList();
-            foreach (var sheet in sheets)
-            {
-                if (sheet.Contains("-"))
-                {
-                    var first = sheet.Substring(0, sheet.IndexOf("-"));
-                    var second = sheet.Substring(sheet.IndexOf("-") + 1);
-
-                    var firstInt = 0;
-                    var secondInt = 0;
-                    if (!Int32.TryParse(first, out firstInt))
-                        throw new Exception($"Parse exception for sheet input " + first + " from range " + sheet + "! Please check sheet input.");
-                    if (!Int32.TryParse(second, out secondInt))
-                        throw new Exception($"Parse exception for sheet input " + second + " from range " + sheet + "! Please check sheet input.");
-
-                    for (int i = firstInt; i <= secondInt; ++i)
-                        sheets2Print.Add(i.ToString());
-                }
-                else
-                {
-                    if(sheet.Length > 0)
-                        sheets2Print.Add(sheet);
-                }
-            }
-            return sheets2Print;
-        }
 
         private async void PrintButton_Click(object sender, RoutedEventArgs e)
         {
@@ -133,7 +105,9 @@ namespace CatalogPrinterApp
                 ranges.headerRight = appSettings.Settings["cellHeaderRight"]?.Value;
                 ranges.headerLeft = appSettings.Settings["cellHeaderLeft"]?.Value;
                 ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
-                ranges.printArea = appSettings.Settings["printArea"]?.Value;                
+                ranges.printArea = appSettings.Settings["printArea"]?.Value;
+
+                string firstPage = appSettings.Settings["firstPage"]?.Value;                       
 
                 if (hash == null)
                     throw new Exception($"Could not find 'password' key in " + _configPath + "!");
@@ -161,6 +135,23 @@ namespace CatalogPrinterApp
                 if (ranges.printArea == null)
                     throw new Exception($"Could not find 'printArea' key in " + _configPath + "!");
 
+                if (firstPage == null)
+                    throw new Exception($"Could not find 'firstPage' key in " + _configPath + "!");
+
+                // sheets to print
+                string sheetInput;
+                bool transform2SheetNames = false;
+                if (InputTarief.Text.Length > 0 && InputPages.Text.Length > 0)
+                    throw new Exception($"Please choose between input Tarieven or input Pagina's");
+                else if (InputPages.Text.Length > 0)
+                {
+                    sheetInput = InputPages.Text;
+                    transform2SheetNames = true;
+                }
+                else if (InputTarief.Text.Length > 0)
+                    sheetInput = InputTarief.Text;
+                else
+                    throw new Exception($"Please provide Tarieven print rage or Pagina's print range");
 
                 // check if files exists
                 if (!File.Exists(masterCatalog))
@@ -170,12 +161,9 @@ namespace CatalogPrinterApp
                 string password = HashUtil.Decrypt(hash);
 
                 // get catalog type
-                string catalogType = InputCatalogType.SelectedItem.ToString();
+                string catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
-                // sheets to print
-                var sheets2Print = GetSheetOrder();
-
-                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(masterCatalog, password, catalogType, outputPath, sheets2Print, ranges));
+                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(masterCatalog, password, catalogType, outputPath, sheetInput, transform2SheetNames, firstPage, ranges));
             }
 
             catch (Exception ex)
@@ -183,5 +171,16 @@ namespace CatalogPrinterApp
                 MessageBox.Show(ex.Message);
             }
         }
+
+        private static readonly Regex _regex = new Regex("[^0-9;-]+");
+        private static bool IsTextInputAllowed(string text)
+        {
+            return _regex.IsMatch(text);
+        }
+        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = IsTextInputAllowed(e.Text);
+        }
+
     }
 }

@@ -55,9 +55,9 @@
                 </ComboBox>
             <Grid Grid.Row="3" Visibility="Visible" Width="Auto"></Grid>
             <Label Grid.Row="3" Grid.Column="0" MinHeight="30" Content="Selectie Tarieven" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"/>
-            <TextBox x:Name="InputTarief" Grid.Row="3" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="InputTarief" PreviewTextInput="NumberValidationTextBox" Grid.Row="3" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top" />
             <Label Grid.Row="4" Grid.Column="0" MinHeight="30" Content="Selectie Pagina's" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"/>
-            <TextBox x:Name="InputPages" Grid.Row="4" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top"/>
+            <TextBox x:Name="InputPages" PreviewTextInput="NumberValidationTextBox" Grid.Row="4" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top" />
             <CheckBox x:Name="InputBTW" Grid.Row="5" Grid.Column="0" Content="BTW" Margin="10,10,10,10" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
 
             <Grid Grid.Row="6" Grid.ColumnSpan="2" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
