@@ -207,7 +207,7 @@ namespace ExcelUtil
                     rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "null";
 
                     // copy sheet
-                    if (catalogType == "Particulier")
+                    if (catalogType.ToUpper() == "PARTICULIER")
                     {
                         //SetBtwField(Workbook.Sheets[shName], true);
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
