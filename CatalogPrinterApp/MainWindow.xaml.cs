@@ -101,7 +101,8 @@ namespace CatalogPrinterApp
                 ranges.btw = appSettings.Settings["cellBtw"]?.Value;
                 ranges.footerRight = appSettings.Settings["cellFooterRight"]?.Value;
                 ranges.footerLeft = appSettings.Settings["cellFooterLeft"]?.Value;
-                ranges.footerMid = appSettings.Settings["cellFooterMid"]?.Value;
+                ranges.footerMidFirst = appSettings.Settings["cellFooterMidFirst"]?.Value;
+                ranges.footerMidSecond = appSettings.Settings["cellFooterMidSecond"]?.Value;
                 ranges.headerRight = appSettings.Settings["cellHeaderRight"]?.Value;
                 ranges.headerLeft = appSettings.Settings["cellHeaderLeft"]?.Value;
                 ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
@@ -124,8 +125,10 @@ namespace CatalogPrinterApp
                     throw new Exception($"Could not find 'cellFooterRight' key in " + _configPath + "!");
                 if (ranges.footerLeft == null)
                     throw new Exception($"Could not find 'cellFooterLeft' key in " + _configPath + "!");
-                if (ranges.footerMid == null)
-                    throw new Exception($"Could not find 'cellFooterMid' key in " + _configPath + "!");
+                if (ranges.footerMidFirst == null)
+                    throw new Exception($"Could not find 'cellFooterMidFirst' key in " + _configPath + "!");
+                if (ranges.footerMidSecond == null)
+                    throw new Exception($"Could not find 'cellFooterMidSecond' key in " + _configPath + "!");
                 if (ranges.headerRight == null)
                     throw new Exception($"Could not find 'cellHeaderRight' key in " + _configPath + "!");
                 if (ranges.headerLeft == null)
@@ -153,6 +156,9 @@ namespace CatalogPrinterApp
                 else
                     throw new Exception($"Please provide Tarieven print rage or Pagina's print range");
 
+                // btw
+                bool inclBtw = InputBTW.IsChecked ?? false;
+
                 // check if files exists
                 if (!File.Exists(masterCatalog))
                     throw new Exception($"Workbook " + masterCatalog + " not found!");
@@ -163,7 +169,7 @@ namespace CatalogPrinterApp
                 // get catalog type
                 string catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
-                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(masterCatalog, password, catalogType, outputPath, sheetInput, transform2SheetNames, firstPage, ranges));
+                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(masterCatalog, password, catalogType, outputPath, sheetInput, transform2SheetNames, firstPage, ranges, inclBtw));
             }
 
             catch (Exception ex)

@@ -15,7 +15,8 @@ namespace ExcelUtil
         public string btw;
         public string footerRight;
         public string footerLeft;
-        public string footerMid;
+        public string footerMidFirst;
+        public string footerMidSecond;
         public string headerRight;
         public string headerLeft;
         public string headerMid;
@@ -215,7 +216,7 @@ namespace ExcelUtil
             return false;
         }
 
-        public static void ExportWorkbook2Pdf(string wbName, string password, string catalogType, string outputPath, string sheetInput, bool transform2SheetNames, string firstPage, InputRanges ranges)
+        public static void ExportWorkbook2Pdf(string wbName, string password, string catalogType, string outputPath, string sheetInput, bool transform2SheetNames, string firstPage, InputRanges ranges, bool inclBtw)
         {
             try
             { 
@@ -228,7 +229,7 @@ namespace ExcelUtil
                     Directory.CreateDirectory(_tmpWorkbookDir);
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
 
-                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooter = "", rightFooter = "";
+                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooterFirst = "", centerFooterSecond = "", rightFooter = "";
 
                 var cellFooterRight = StringRange2Coordinate(ranges.footerRight);
                 if (cellFooterRight.Key == 0)
@@ -236,9 +237,12 @@ namespace ExcelUtil
                 var cellFooterLeft = StringRange2Coordinate(ranges.footerLeft);
                 if (cellFooterLeft.Key == 0)
                     throw new Exception($"Invalid input for cell range cellFooterLeft: " + ranges.footerLeft + "!");
-                var cellFooterMid = StringRange2Coordinate(ranges.footerMid);
-                if (cellFooterMid.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterMid: " + ranges.footerMid + "!");
+                var cellFooterMidFirst = StringRange2Coordinate(ranges.footerMidFirst);
+                if (cellFooterMidFirst.Key == 0)
+                    throw new Exception($"Invalid input for cell range cellFooterMidFirst: " + ranges.footerMidFirst + "!");
+                var cellFooterMidSecond = StringRange2Coordinate(ranges.footerMidSecond);
+                if (cellFooterMidSecond.Key == 0)
+                    throw new Exception($"Invalid input for cell range cellFooterMidSecond: " + ranges.footerMidSecond + "!");
                 var cellHeaderRight = StringRange2Coordinate(ranges.headerRight);
                 if (cellHeaderRight.Key == 0)
                     throw new Exception($"Invalid input for cell range cellHeaderRight: " + ranges.headerRight + "!");
@@ -276,31 +280,34 @@ namespace ExcelUtil
                     //if (rightHeaderDate != null)
                     //    rightHeader = rightHeaderDate.ToString("dd/MM/yyyy");
                     leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                    centerFooter = (MasterWb.Sheets[shName].Cells[cellFooterMid.Key, cellFooterMid.Value] as Range).Value as string ?? "";
+                    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
                     rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "";
 
                     // copy sheet
                     if (catalogType.ToUpper() == "PARTICULIER")
                     {
-                        //SetBtwField(Workbook.Sheets[shName], true);
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "JA";
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "JA";
-                        //SetBtwField(Workbook.Sheets[shName], false);
+
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-                        Wb2Print.Sheets[Wb2Print.Sheets.Count].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
                     }
                     else
                     {
-                        //var from = MasterWb.Sheets[shName].Range(ranges.printArea);
-                        //Wb2Print.Sheets.Add(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-                        //var to = Wb2Print.Sheets[Wb2Print.Sheets.Count].Range(ranges.printArea);
-                        //from.Copy(to);
-
+                        if (inclBtw)
+                        {
+                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "JA";
+                        }
+                        else
+                        {
+                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
+                        }
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
                     }
 
                     //format sheets
-                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooter, rightFooter, ranges.printArea);
+                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
                 }
 
                 // delete default first sheet on creation of workbook
@@ -318,6 +325,8 @@ namespace ExcelUtil
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
 
+                File.Delete(_tmpWorkbookDir + @"\" + _tmpWokbookName);
+
             }
             catch (Exception ex)
             {
@@ -330,13 +339,13 @@ namespace ExcelUtil
             }
         }
 
-        public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string centerFooter, string rightFooter, string printArea)
+        public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string centerFooterFirst, string centerFooterSecond, string rightFooter, string printArea)
         {
             sh.PageSetup.LeftHeader = leftHeader;
             sh.PageSetup.CenterHeader = "&P / &N";
             sh.PageSetup.RightHeader = rightHeader;
             sh.PageSetup.LeftFooter = leftFooter;
-            sh.PageSetup.CenterFooter = "&B" + centerFooter + "&B";
+            sh.PageSetup.CenterFooter = "&B" + centerFooterFirst + "\n" + centerFooterSecond + "&B";
             sh.PageSetup.RightFooter = rightFooter;
 
             sh.PageSetup.PrintArea = printArea;
