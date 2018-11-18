@@ -325,6 +325,8 @@ namespace ExcelUtil
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
 
+                var source = new FileInfo(_tmpWorkbookDir + @"\" + _tmpWokbookName);
+                source.CopyTo(_tmpWorkbookDir + @"\_" + _tmpWokbookName, true);
                 File.Delete(_tmpWorkbookDir + @"\" + _tmpWokbookName);
 
             }
