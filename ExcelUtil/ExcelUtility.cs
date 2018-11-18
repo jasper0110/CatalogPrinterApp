@@ -228,7 +228,7 @@ namespace ExcelUtil
                     Directory.CreateDirectory(_tmpWorkbookDir);
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
 
-                string leftHeader = "null", centerHeader = "null", rightHeader = "null", leftFooter = "null", rightFooter = "null";
+                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", rightFooter = "";
 
                 var cellFooterRight = StringRange2Coordinate(ranges.footerRight);
                 if (cellFooterRight.Key == 0)
@@ -310,13 +310,16 @@ namespace ExcelUtil
                 foreach (Worksheet sh in Wb2Print.Worksheets)
                     FormatSheet(sh, leftHeader, centerHeader, rightHeader, leftFooter, rightFooter, ranges.printArea);
                 Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
-                
+
+                ExcelUtility.CloseWorkbook(MasterWb, false);
+                ExcelUtility.CloseWorkbook(Wb2Print, true);
+
             }
             catch (Exception ex)
             {
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
-                File.Delete(_tmpWorkbookDir + _tmpWokbookName);
+                //File.Delete(_tmpWorkbookDir + _tmpWokbookName);
 
                 ExcelUtility.CloseExcel();
                 throw new Exception(ex.Message);
