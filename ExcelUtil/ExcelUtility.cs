@@ -228,7 +228,7 @@ namespace ExcelUtil
                     Directory.CreateDirectory(_tmpWorkbookDir);
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
 
-                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", rightFooter = "";
+                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooter = "", rightFooter = "";
 
                 var cellFooterRight = StringRange2Coordinate(ranges.footerRight);
                 if (cellFooterRight.Key == 0)
@@ -276,6 +276,7 @@ namespace ExcelUtil
                     //if (rightHeaderDate != null)
                     //    rightHeader = rightHeaderDate.ToString("dd/MM/yyyy");
                     leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                    centerFooter = (MasterWb.Sheets[shName].Cells[cellFooterMid.Key, cellFooterMid.Value] as Range).Value as string ?? "";
                     rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "";
 
                     // copy sheet
@@ -297,20 +298,19 @@ namespace ExcelUtil
 
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
                     }
+
+                    //format sheets
+                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooter, rightFooter, ranges.printArea);
                 }
 
                 // delete default first sheet on creation of workbook
                 Wb2Print.Activate();
                 Wb2Print.Worksheets[1].Delete();
 
-                // format and print sheets
+                // print sheets
                 string outputFile = outputPath + @"\catalog.pdf";
                 if (File.Exists(outputFile) && ExcelUtility.IsFileInUse(outputFile))
                     throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
-                foreach (Worksheet sh in Wb2Print.Worksheets)
-                    FormatSheet(sh, leftHeader, centerHeader, rightHeader, leftFooter, rightFooter, ranges.printArea);
-
-                // check if output directory exists, of not create it
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
                 Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
@@ -330,12 +330,13 @@ namespace ExcelUtil
             }
         }
 
-        public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string rightFooter, string printArea)
+        public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string centerFooter, string rightFooter, string printArea)
         {
             sh.PageSetup.LeftHeader = leftHeader;
-            sh.PageSetup.CenterHeader = centerHeader;
+            sh.PageSetup.CenterHeader = "&P / &N";
             sh.PageSetup.RightHeader = rightHeader;
             sh.PageSetup.LeftFooter = leftFooter;
+            sh.PageSetup.CenterFooter = "&B" + centerFooter + "&B";
             sh.PageSetup.RightFooter = rightFooter;
 
             sh.PageSetup.PrintArea = printArea;
