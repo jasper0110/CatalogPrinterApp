@@ -268,15 +268,15 @@ namespace ExcelUtil
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogType.ToUpper();
                         
-                    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "null";
-                    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "null";
-                    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "null";
+                    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
                     //var rightHeaderDate = ((MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value);
                     //rightHeader = "null";
                     //if (rightHeaderDate != null)
                     //    rightHeader = rightHeaderDate.ToString("dd/MM/yyyy");
-                    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "null";
-                    rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "null";
+                    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                    rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "";
 
                     // copy sheet
                     if (catalogType.ToUpper() == "PARTICULIER")
@@ -309,6 +309,10 @@ namespace ExcelUtil
                     throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
                 foreach (Worksheet sh in Wb2Print.Worksheets)
                     FormatSheet(sh, leftHeader, centerHeader, rightHeader, leftFooter, rightFooter, ranges.printArea);
+
+                // check if output directory exists, of not create it
+                if (!Directory.Exists(outputPath))
+                    Directory.CreateDirectory(outputPath);
                 Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
 
                 ExcelUtility.CloseWorkbook(MasterWb, false);
