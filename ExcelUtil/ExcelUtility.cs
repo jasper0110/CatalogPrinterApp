@@ -9,6 +9,16 @@ using System.Threading.Tasks;
 
 namespace ExcelUtil
 {
+    public enum CatalogType
+    {
+        PARTICULIER = 1,
+        DAKWERKER = 2,
+        VERANDA = 3,
+        AANNEMER = 4,
+        BLANCO = 5,
+        STOCK = 6
+    }
+
     public struct InputRanges
     {       
         public string catalogType;
@@ -263,51 +273,90 @@ namespace ExcelUtil
                 else
                     sheetOrder = MultipleRange2List(sheetInput);
 
+                int catalogTypeInt;
+                switch (catalogType)
+                {
+                    case "Particulier":
+                        catalogTypeInt = (int)CatalogType.PARTICULIER;
+                        inclBtw = true;
+                        break;
+                    case "Dakwerker":
+                        catalogTypeInt = (int)CatalogType.DAKWERKER;
+                        break;
+                    case "Veranda":
+                        catalogTypeInt = (int)CatalogType.VERANDA;
+                        break;
+                    case "Aannemer":
+                        catalogTypeInt = (int)CatalogType.AANNEMER;
+                        break;
+                    case "Blanco":
+                        catalogTypeInt = (int)CatalogType.BLANCO;
+                        break;
+                    case "Stock":
+                        catalogTypeInt = (int)CatalogType.STOCK;
+                        break;
+                    default:
+                        catalogTypeInt = 0;
+                        break;
+                   
+                }
+
+
                 // copy necessary sheets to temp workbook and put sheets in correct order
                 foreach (var shName in sheetOrder)
                 {
                     if (ExcelUtility.GetWorksheetByName(MasterWb, shName) == null)
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
+
                     // set catalog type
-                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogType.ToUpper();
-                        
-                    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                    //var rightHeaderDate = ((MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value);
-                    //rightHeader = "null";
-                    //if (rightHeaderDate != null)
-                    //    rightHeader = rightHeaderDate.ToString("dd/MM/yyyy");
-                    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                    rightFooter = (MasterWb.Sheets[shName].Cells[cellFooterRight.Key, cellFooterRight.Value] as Range).Value as string ?? "";
-
-                    // copy sheet
-                    if (catalogType.ToUpper() == "PARTICULIER")
+                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
+                    // set btw
+                    if (inclBtw)
                     {
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "JA";
-                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
-                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
                     }
                     else
                     {
-                        if (inclBtw)
-                        {
-                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "JA";
-                        }
-                        else
-                        {
-                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = "NEEN";
-                        }
-                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
                     }
 
-                    //format sheets
+                    // get headers and footers
+                    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
+                    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
+                    rightFooter = "TARIEF Nr. " + shName;
+
+                    // copy sheet
+                    MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+
+                    //format sheet
                     FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+
+                    // copy sheet
+                    if (catalogTypeInt == (int)CatalogType.PARTICULIER)
+                    {
+                        // set btw false
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+
+                        // get headers and footers
+                        leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                        centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                        rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
+                        leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                        centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                        centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
+                        rightFooter = "TARIEF Nr. " + shName;
+
+                        // copy sheet
+                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+
+                        //format sheet
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+                    }                 
                 }
 
                 // delete default first sheet on creation of workbook
@@ -343,12 +392,12 @@ namespace ExcelUtil
 
         public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string centerFooterFirst, string centerFooterSecond, string rightFooter, string printArea)
         {
-            sh.PageSetup.LeftHeader = leftHeader;
-            sh.PageSetup.CenterHeader = "&P / &N";
-            sh.PageSetup.RightHeader = rightHeader;
-            sh.PageSetup.LeftFooter = leftFooter;
-            sh.PageSetup.CenterFooter = "&B" + centerFooterFirst + "\n" + centerFooterSecond + "&B";
-            sh.PageSetup.RightFooter = rightFooter;
+            sh.PageSetup.LeftHeader = "&\"Arial\"&12" + leftHeader;
+            sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
+            sh.PageSetup.RightHeader = "&\"Arial\"&12 " + rightHeader;
+            sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + leftFooter;
+            sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + centerFooterFirst + "\n" + centerFooterSecond + "&B";
+            sh.PageSetup.RightFooter = "&\"Arial\"&12" + rightFooter;
 
             sh.PageSetup.PrintArea = printArea;
 
@@ -358,10 +407,10 @@ namespace ExcelUtil
             sh.PageSetup.CenterVertically = true;
             sh.PageSetup.CenterHorizontally = true;
 
-            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.RightMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.TopMargin = ExcelUtility.XlApp.InchesToPoints(0.75);
-            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.InchesToPoints(0.75);
+            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
+            sh.PageSetup.RightMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
+            sh.PageSetup.TopMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
+            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
             sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
             sh.PageSetup.FooterMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
         }
