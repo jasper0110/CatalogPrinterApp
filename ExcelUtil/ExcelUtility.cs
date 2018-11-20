@@ -416,12 +416,12 @@ namespace ExcelUtil
             sh.PageSetup.CenterVertically = true;
             sh.PageSetup.CenterHorizontally = true;
 
-            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.CentimetersToPoints(0.5);
-            sh.PageSetup.RightMargin = ExcelUtility.XlApp.CentimetersToPoints(0.5);
-            sh.PageSetup.TopMargin = ExcelUtility.XlApp.CentimetersToPoints(0.7);
-            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.CentimetersToPoints(0.7);
-            sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.CentimetersToPoints(0.3);
-            sh.PageSetup.FooterMargin = ExcelUtility.XlApp.CentimetersToPoints(0.3);
+            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
+            sh.PageSetup.RightMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
+            sh.PageSetup.TopMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
+            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
+            sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
+            sh.PageSetup.FooterMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
         }
     }
 }
