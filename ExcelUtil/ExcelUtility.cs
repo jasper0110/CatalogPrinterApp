@@ -226,7 +226,7 @@ namespace ExcelUtil
             return false;
         }
 
-        public static void ExportWorkbook2Pdf(string wbName, string password, string catalogType, string outputPath, string sheetInput, bool transform2SheetNames, string firstPage, InputRanges ranges, bool inclBtw)
+        public static void ExportWorkbook2Pdf(Progress<int> progress, string wbName, string password, string catalogType, string outputPath, string sheetInput, string firstPage, InputRanges ranges, bool inclBtw)
         {
             try
             { 
@@ -238,6 +238,9 @@ namespace ExcelUtil
                 if (!Directory.Exists(_tmpWorkbookDir))
                     Directory.CreateDirectory(_tmpWorkbookDir);
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
+
+                // progress update
+                ((IProgress<int>)progress).Report(30);
 
                 string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooterFirst = "", centerFooterSecond = "", rightFooter = "";
 
@@ -267,12 +270,9 @@ namespace ExcelUtil
                 var cellBtw = StringRange2Coordinate(ranges.btw);
 
                 // get sheet order
-                var sheetOrder = new List<string>();
-                if (transform2SheetNames)
-                    sheetOrder = GetSheetsFromInputPages(sheetInput, firstPage);
-                else
-                    sheetOrder = MultipleRange2List(sheetInput);
+                var sheetOrder = MultipleRange2List(sheetInput);
 
+                // catalog int type
                 int catalogTypeInt;
                 switch (catalogType)
                 {
@@ -301,6 +301,8 @@ namespace ExcelUtil
                    
                 }
 
+                double progressSheets = 30.0;
+                double incr = 70.0 / (double)sheetOrder.Count;
 
                 // copy necessary sheets to temp workbook and put sheets in correct order
                 foreach (var shName in sheetOrder)
@@ -356,7 +358,11 @@ namespace ExcelUtil
 
                         //format sheet
                         FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
-                    }                 
+                    }
+
+                    // progress update
+                    progressSheets += incr;
+                    ((IProgress<int>)progress).Report((int)progressSheets);
                 }
 
                 // delete default first sheet on creation of workbook
@@ -369,6 +375,10 @@ namespace ExcelUtil
                     throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
                 if (!Directory.Exists(outputPath))
                     Directory.CreateDirectory(outputPath);
+
+                // progress update
+                ((IProgress<int>)progress).Report(100);
+
                 Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
 
                 ExcelUtility.CloseWorkbook(MasterWb, false);

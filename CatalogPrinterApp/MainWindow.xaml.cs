@@ -84,6 +84,9 @@ namespace CatalogPrinterApp
         {
             try
             {
+                // progress
+                var progress = new Progress<int>(value => ProgressBar.Value = value);
+
                 // open config
                 if (!File.Exists(_configPath))
                     throw new Exception($"Config file " + _configPath + " not found!");
@@ -142,19 +145,9 @@ namespace CatalogPrinterApp
                     throw new Exception($"Could not find 'firstPage' key in " + _configPath + "!");
 
                 // sheets to print
-                string sheetInput;
-                bool transform2SheetNames = false;
-                if (InputTarief.Text.Length > 0 && InputPages.Text.Length > 0)
-                    throw new Exception($"Please choose between input Tarieven or input Pagina's");
-                else if (InputPages.Text.Length > 0)
-                {
-                    sheetInput = InputPages.Text;
-                    transform2SheetNames = true;
-                }
-                else if (InputTarief.Text.Length > 0)
-                    sheetInput = InputTarief.Text;
-                else
-                    throw new Exception($"Please provide Tarieven print rage or Pagina's print range");
+                string sheetInput = InputTarief.Text;
+                if (InputTarief.Text.Length < 1)
+                    throw new Exception($"Please provide Tarieven print range.");
 
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
@@ -169,11 +162,18 @@ namespace CatalogPrinterApp
                 // get catalog type
                 string catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
-                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(masterCatalog, password, catalogType, outputPath, sheetInput, transform2SheetNames, firstPage, ranges, inclBtw));
+                // progress update
+                ((IProgress<int>)progress).Report(5);
+
+                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(progress, masterCatalog, password, catalogType, outputPath, sheetInput, firstPage, ranges, inclBtw));
+
+                // progress update
+                ((IProgress<int>)progress).Report(0);
             }
 
             catch (Exception ex)
             {
+                ProgressBar.Value = 0;
                 MessageBox.Show(ex.Message);
             }
         }
