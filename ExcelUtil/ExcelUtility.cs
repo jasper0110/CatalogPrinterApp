@@ -278,7 +278,6 @@ namespace ExcelUtil
                 {
                     case "Particulier":
                         catalogTypeInt = (int)CatalogType.PARTICULIER;
-                        inclBtw = true;
                         break;
                     case "Dakwerker":
                         catalogTypeInt = (int)CatalogType.DAKWERKER;
@@ -338,27 +337,27 @@ namespace ExcelUtil
                     //format sheet
                     FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
 
-                    // copy sheet
-                    if (catalogTypeInt == (int)CatalogType.PARTICULIER)
-                    {
-                        // set btw false
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+                    //// copy sheet
+                    //if (catalogTypeInt == (int)CatalogType.PARTICULIER)
+                    //{
+                    //    // set btw false
+                    //    MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
 
-                        // get headers and footers
-                        leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                        centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                        rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                        leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                        centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                        centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                        rightFooter = "TARIEF Nr. " + shName;
+                    //    // get headers and footers
+                    //    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                    //    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                    //    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
+                    //    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                    //    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                    //    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
+                    //    rightFooter = "TARIEF Nr. " + shName;
 
-                        // copy sheet
-                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+                    //    // copy sheet
+                    //    MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
-                        //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
-                    }
+                    //    //format sheet
+                    //    FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+                    //}
 
                     // progress update
                     progressSheets += incr;
@@ -417,12 +416,12 @@ namespace ExcelUtil
             sh.PageSetup.CenterVertically = true;
             sh.PageSetup.CenterHorizontally = true;
 
-            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
-            sh.PageSetup.RightMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
-            sh.PageSetup.TopMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
-            sh.PageSetup.FooterMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
+            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.CentimetersToPoints(0.5);
+            sh.PageSetup.RightMargin = ExcelUtility.XlApp.CentimetersToPoints(0.5);
+            sh.PageSetup.TopMargin = ExcelUtility.XlApp.CentimetersToPoints(0.7);
+            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.CentimetersToPoints(0.7);
+            sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.CentimetersToPoints(0.3);
+            sh.PageSetup.FooterMargin = ExcelUtility.XlApp.CentimetersToPoints(0.3);
         }
     }
 }
