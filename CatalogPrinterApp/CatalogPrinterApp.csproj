@@ -54,7 +54,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Printer.ico</ApplicationIcon>
+    <ApplicationIcon>Catalog.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -136,6 +136,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Printer.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Catalog.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
