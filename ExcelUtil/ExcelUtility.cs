@@ -331,6 +331,9 @@ namespace ExcelUtil
                     centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
                     rightFooter = "TARIEF Nr. " + shName;
 
+                    // unhide all columns
+                    MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
+
                     // copy sheet
                     MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
