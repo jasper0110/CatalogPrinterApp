@@ -111,8 +111,6 @@ namespace CatalogPrinterApp
                 ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
                 ranges.printArea = appSettings.Settings["printArea"]?.Value;
 
-                string firstPage = appSettings.Settings["firstPage"]?.Value;                       
-
                 if (hash == null)
                     throw new Exception($"Could not find 'password' key in " + _configPath + "!");
                 if (masterCatalog == null)
@@ -141,9 +139,6 @@ namespace CatalogPrinterApp
                 if (ranges.printArea == null)
                     throw new Exception($"Could not find 'printArea' key in " + _configPath + "!");
 
-                if (firstPage == null)
-                    throw new Exception($"Could not find 'firstPage' key in " + _configPath + "!");
-
                 // sheets to print
                 string sheetInput = InputTarief.Text;
                 if (InputTarief.Text.Length < 1)
@@ -165,7 +160,8 @@ namespace CatalogPrinterApp
                 // progress update
                 ((IProgress<int>)progress).Report(5);
 
-                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(progress, masterCatalog, password, catalogType, outputPath, sheetInput, firstPage, ranges, inclBtw));
+                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(progress, masterCatalog, password, catalogType, 
+                    outputPath, sheetInput, ranges, inclBtw));
 
                 // progress update
                 ((IProgress<int>)progress).Report(0);

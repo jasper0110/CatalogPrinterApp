@@ -107,31 +107,6 @@ namespace ExcelUtil
             return sheets2Print;
         }
 
-        private static List<string> GetSheetsFromInputPages(string sheetInput, string firstPage)
-        {
-            var masterWbSheetOrder = new List<string>();
-
-            Worksheet sh = MasterWb.Sheets[firstPage];
-            while(sh != null)
-            {
-                masterWbSheetOrder.Add(sh.Name);
-                sh = sh.Next;
-            }
-
-            var inputPages = MultipleRange2List(sheetInput).Select(s => Int32.Parse(s));
-            int maxIndex = inputPages.Max();
-            if(maxIndex > masterWbSheetOrder.Count)
-                throw new Exception($"Page input " + maxIndex + " not found in " + MasterWb + "! Please check page input.");
-
-            var sheets2Print = new List<string>();
-            foreach(var input in inputPages)
-            {
-                sheets2Print.Add(masterWbSheetOrder[input - 1]);
-            }
-
-            return sheets2Print;
-        }
-
         public static KeyValuePair<int, int> StringRange2Coordinate(string range)
         {
             var column = new string(range.TakeWhile(char.IsUpper).ToArray());
@@ -226,7 +201,8 @@ namespace ExcelUtil
             return false;
         }
 
-        public static void ExportWorkbook2Pdf(Progress<int> progress, string wbName, string password, string catalogType, string outputPath, string sheetInput, string firstPage, InputRanges ranges, bool inclBtw)
+        public static void ExportWorkbook2Pdf(Progress<int> progress, string wbName, string password, string catalogType, string outputPath, 
+            string sheetInput, InputRanges ranges, bool inclBtw)
         {
             try
             { 
