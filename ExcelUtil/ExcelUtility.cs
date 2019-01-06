@@ -33,6 +33,15 @@ namespace ExcelUtil
         public string printArea;
     }
 
+    public struct AppParameters
+    {
+        public InputRanges ranges;
+        public string masterCatalog;
+        public string outputPath;
+        public string hash;
+        public string sheetSummaryName;
+    }
+
     public static class ExcelUtility
     {
         public static readonly string _tmpWorkbookDir = @"C:\temp";
@@ -87,7 +96,7 @@ namespace ExcelUtil
             return list;
         }
 
-        private static List<string> MultipleRange2List(string sheetInput)
+        public static List<string> MultipleRange2List(string sheetInput)
         {
             var sheets2Print = new List<string>();
 
@@ -201,13 +210,54 @@ namespace ExcelUtil
             return false;
         }
 
-        public static void ExportWorkbook2Pdf(Progress<int> progress, string wbName, string password, string catalogType, string outputPath, 
-            string sheetInput, InputRanges ranges, bool inclBtw)
+        public static void ExportWorkbook2Pdf(IProgress<int> progress, AppParameters parameters, string password, string catalogType, 
+            List<string> sheetOrder, bool inclBtw)
         {
             try
-            { 
+            {
                 // open master workbook
-                MasterWb = ExcelUtility.GetWorkbook(wbName, password);
+                MasterWb = ExcelUtility.GetWorkbook(parameters.masterCatalog, password);
+
+                if (sheetOrder == null)
+                {
+                    if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
+                        throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
+                            "\nPlease check the name of the summary sheet.");
+                    var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
+                    int columnInt = -1;
+                    for (int i = 1; i <= 100; ++i)
+                    {
+                        var str = header[1, i];
+                        if (str == catalogType)
+                        {
+                            columnInt = i;
+                            break;
+                        }
+                    }
+
+                    if (columnInt < 0)
+                        throw new Exception($"Catalog type " + catalogType + " not found in worksheet " + parameters.sheetSummaryName + "!" +
+                            "\nPlease check the name of the summary sheet and if the catalog type exists in the sheet.");
+
+                    char columnChar = (char)(columnInt + 64);
+                    string rankRange = columnChar + ":" + columnChar;
+                    var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
+                    var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
+
+                    var nWorksheets = MasterWb.Sheets.Count;
+                    var sheetOrderDict = new SortedDictionary<int, string>();                    
+                    for (int i = 2; i <= nWorksheets; ++i)
+                    {
+                        var rank = Convert.ToInt32(sheetRank[i, 1]);
+                        var name = Convert.ToString(sheetName[i, 1]);
+                        // check if item already exists
+                        // add parse safety for rank and name
+                        if (rank > 0 && name != null)
+                            sheetOrderDict[rank] = name;
+                    }
+                    sheetOrder = sheetOrderDict.Values.ToList();
+                }
+                
 
                 // open temp workbook to which the sheets of interest are copied to
                 Wb2Print = ExcelUtility.XlApp.Workbooks.Add();
@@ -216,37 +266,34 @@ namespace ExcelUtil
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
 
                 // progress update
-                ((IProgress<int>)progress).Report(30);
+                progress.Report(30);
 
                 string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooterFirst = "", centerFooterSecond = "", rightFooter = "";
 
-                var cellFooterRight = StringRange2Coordinate(ranges.footerRight);
+                var cellFooterRight = StringRange2Coordinate(parameters.ranges.footerRight);
                 if (cellFooterRight.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterRight: " + ranges.footerRight + "!");
-                var cellFooterLeft = StringRange2Coordinate(ranges.footerLeft);
+                    throw new Exception($"Invalid input for cell range cellFooterRight: " + parameters.ranges.footerRight + "!");
+                var cellFooterLeft = StringRange2Coordinate(parameters.ranges.footerLeft);
                 if (cellFooterLeft.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterLeft: " + ranges.footerLeft + "!");
-                var cellFooterMidFirst = StringRange2Coordinate(ranges.footerMidFirst);
+                    throw new Exception($"Invalid input for cell range cellFooterLeft: " + parameters.ranges.footerLeft + "!");
+                var cellFooterMidFirst = StringRange2Coordinate(parameters.ranges.footerMidFirst);
                 if (cellFooterMidFirst.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterMidFirst: " + ranges.footerMidFirst + "!");
-                var cellFooterMidSecond = StringRange2Coordinate(ranges.footerMidSecond);
+                    throw new Exception($"Invalid input for cell range cellFooterMidFirst: " + parameters.ranges.footerMidFirst + "!");
+                var cellFooterMidSecond = StringRange2Coordinate(parameters.ranges.footerMidSecond);
                 if (cellFooterMidSecond.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterMidSecond: " + ranges.footerMidSecond + "!");
-                var cellHeaderRight = StringRange2Coordinate(ranges.headerRight);
+                    throw new Exception($"Invalid input for cell range cellFooterMidSecond: " + parameters.ranges.footerMidSecond + "!");
+                var cellHeaderRight = StringRange2Coordinate(parameters.ranges.headerRight);
                 if (cellHeaderRight.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderRight: " + ranges.headerRight + "!");
-                var cellHeaderLeft = StringRange2Coordinate(ranges.headerLeft);
+                    throw new Exception($"Invalid input for cell range cellHeaderRight: " + parameters.ranges.headerRight + "!");
+                var cellHeaderLeft = StringRange2Coordinate(parameters.ranges.headerLeft);
                 if (cellHeaderLeft.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderLeft: " + ranges.headerLeft + "!");
-                var cellHeaderMid = StringRange2Coordinate(ranges.headerMid);
+                    throw new Exception($"Invalid input for cell range cellHeaderLeft: " + parameters.ranges.headerLeft + "!");
+                var cellHeaderMid = StringRange2Coordinate(parameters.ranges.headerMid);
                 if (cellHeaderMid.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderMid: " + ranges.headerMid + "!");
+                    throw new Exception($"Invalid input for cell range cellHeaderMid: " + parameters.ranges.headerMid + "!");
 
-                var cellCatalogType = StringRange2Coordinate(ranges.catalogType);
-                var cellBtw = StringRange2Coordinate(ranges.btw);
-
-                // get sheet order
-                var sheetOrder = MultipleRange2List(sheetInput);
+                var cellCatalogType = StringRange2Coordinate(parameters.ranges.catalogType);
+                var cellBtw = StringRange2Coordinate(parameters.ranges.btw);
 
                 // catalog int type
                 int catalogTypeInt;
@@ -314,7 +361,7 @@ namespace ExcelUtil
                     MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                     //format sheet
-                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, parameters.ranges.printArea);
 
                     //// copy sheet
                     //if (catalogTypeInt == (int)CatalogType.PARTICULIER)
@@ -340,7 +387,7 @@ namespace ExcelUtil
 
                     // progress update
                     progressSheets += incr;
-                    ((IProgress<int>)progress).Report((int)progressSheets);
+                    progress.Report((int)progressSheets);
                 }
 
                 // delete default first sheet on creation of workbook
@@ -348,14 +395,14 @@ namespace ExcelUtil
                 Wb2Print.Worksheets[1].Delete();
 
                 // print sheets
-                string outputFile = outputPath + @"\catalog.pdf";
+                string outputFile = parameters.outputPath + @"\catalog.pdf";
                 if (File.Exists(outputFile) && ExcelUtility.IsFileInUse(outputFile))
                     throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
-                if (!Directory.Exists(outputPath))
-                    Directory.CreateDirectory(outputPath);
+                if (!Directory.Exists(parameters.outputPath))
+                    Directory.CreateDirectory(parameters.outputPath);
 
                 // progress update
-                ((IProgress<int>)progress).Report(100);
+                progress.Report(100);
 
                 Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
 

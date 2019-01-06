@@ -78,98 +78,153 @@ namespace CatalogPrinterApp
             Application.Current.Shutdown();
         }
 
+        private AppParameters GetConfigParameters()
+        {
+            var settings = new AppParameters();
 
+            // open config
+            if (!File.Exists(_configPath))
+                throw new Exception($"Config file " + _configPath + " not found!");
+            ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+            configMap.ExeConfigFilename = _configPath;
+            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+            var appSettings = config.GetSection("appSettings") as AppSettingsSection;
+            // get config values
+            settings.hash = appSettings.Settings["key"]?.Value;
+            settings.masterCatalog = appSettings.Settings["masterCatalog"]?.Value;
+            settings.outputPath = appSettings.Settings["outputPath"]?.Value;
 
-        private async void PrintButton_Click(object sender, RoutedEventArgs e)
+            var ranges = new InputRanges();
+            ranges.catalogType = appSettings.Settings["cellCatalogType"]?.Value;
+            ranges.btw = appSettings.Settings["cellBtw"]?.Value;
+            ranges.footerRight = appSettings.Settings["cellFooterRight"]?.Value;
+            ranges.footerLeft = appSettings.Settings["cellFooterLeft"]?.Value;
+            ranges.footerMidFirst = appSettings.Settings["cellFooterMidFirst"]?.Value;
+            ranges.footerMidSecond = appSettings.Settings["cellFooterMidSecond"]?.Value;
+            ranges.headerRight = appSettings.Settings["cellHeaderRight"]?.Value;
+            ranges.headerLeft = appSettings.Settings["cellHeaderLeft"]?.Value;
+            ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
+            ranges.printArea = appSettings.Settings["printArea"]?.Value;
+
+            settings.ranges = ranges;
+
+            settings.sheetSummaryName = appSettings.Settings["sheetSummaryName"]?.Value;
+
+            if (settings.hash == null)
+                throw new Exception($"Could not find 'password' key in " + _configPath + "!");
+            if (settings.masterCatalog == null)
+                throw new Exception($"Could not find 'masterCatalog' key in " + _configPath + "!");
+            if (settings.outputPath == null)
+                throw new Exception($"Could not find 'outputPath' key in " + _configPath + "!");
+
+            if (ranges.catalogType == null)
+                throw new Exception($"Could not find 'cellCatalogType' key in " + _configPath + "!");
+            if (ranges.btw == null)
+                throw new Exception($"Could not find 'cellBtw' key in " + _configPath + "!");
+            if (ranges.footerRight == null)
+                throw new Exception($"Could not find 'cellFooterRight' key in " + _configPath + "!");
+            if (ranges.footerLeft == null)
+                throw new Exception($"Could not find 'cellFooterLeft' key in " + _configPath + "!");
+            if (ranges.footerMidFirst == null)
+                throw new Exception($"Could not find 'cellFooterMidFirst' key in " + _configPath + "!");
+            if (ranges.footerMidSecond == null)
+                throw new Exception($"Could not find 'cellFooterMidSecond' key in " + _configPath + "!");
+            if (ranges.headerRight == null)
+                throw new Exception($"Could not find 'cellHeaderRight' key in " + _configPath + "!");
+            if (ranges.headerLeft == null)
+                throw new Exception($"Could not find 'cellHeaderLeft' key in " + _configPath + "!");
+            if (ranges.headerMid == null)
+                throw new Exception($"Could not find 'cellHeaderMid' key in " + _configPath + "!");
+            if (ranges.printArea == null)
+                throw new Exception($"Could not find 'printArea' key in " + _configPath + "!");
+
+            if (settings.sheetSummaryName == null)
+                throw new Exception($"Could not find 'sheetSummaryName' key in " + _configPath + "!");
+
+            return settings;
+        }
+
+        private async void PrintAllButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 // progress
                 var progress = new Progress<int>(value => ProgressBar.Value = value);
 
-                // open config
-                if (!File.Exists(_configPath))
-                    throw new Exception($"Config file " + _configPath + " not found!");
-                ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-                configMap.ExeConfigFilename = _configPath;
-                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-                var appSettings = config.GetSection("appSettings") as AppSettingsSection;
-                // get config values
-                string hash = appSettings.Settings["key"]?.Value;
-                string masterCatalog = appSettings.Settings["masterCatalog"]?.Value;
-                string outputPath = appSettings.Settings["outputPath"]?.Value;
+                // get catalog type
+                var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
-                var ranges = new InputRanges();
-                ranges.catalogType = appSettings.Settings["cellCatalogType"]?.Value;
-                ranges.btw = appSettings.Settings["cellBtw"]?.Value;
-                ranges.footerRight = appSettings.Settings["cellFooterRight"]?.Value;
-                ranges.footerLeft = appSettings.Settings["cellFooterLeft"]?.Value;
-                ranges.footerMidFirst = appSettings.Settings["cellFooterMidFirst"]?.Value;
-                ranges.footerMidSecond = appSettings.Settings["cellFooterMidSecond"]?.Value;
-                ranges.headerRight = appSettings.Settings["cellHeaderRight"]?.Value;
-                ranges.headerLeft = appSettings.Settings["cellHeaderLeft"]?.Value;
-                ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
-                ranges.printArea = appSettings.Settings["printArea"]?.Value;
+                // btw
+                bool inclBtw = InputBTW.IsChecked ?? false;
 
-                if (hash == null)
-                    throw new Exception($"Could not find 'password' key in " + _configPath + "!");
-                if (masterCatalog == null)
-                    throw new Exception($"Could not find 'masterCatalog' key in " + _configPath + "!");
-                if (outputPath == null)
-                    throw new Exception($"Could not find 'outputPath' key in " + _configPath + "!");
+                // print
+                await Task.Run(() => PrintCatalog(null, progress, catalogType, inclBtw));
+            }
+            catch (Exception ex)
+            {
+                ProgressBar.Value = 0;
+                MessageBox.Show(ex.Message);
+            }
+        }
 
-                if (ranges.catalogType == null)
-                    throw new Exception($"Could not find 'cellCatalogType' key in " + _configPath + "!");
-                if (ranges.btw == null)
-                    throw new Exception($"Could not find 'cellBtw' key in " + _configPath + "!");
-                if (ranges.footerRight == null)
-                    throw new Exception($"Could not find 'cellFooterRight' key in " + _configPath + "!");
-                if (ranges.footerLeft == null)
-                    throw new Exception($"Could not find 'cellFooterLeft' key in " + _configPath + "!");
-                if (ranges.footerMidFirst == null)
-                    throw new Exception($"Could not find 'cellFooterMidFirst' key in " + _configPath + "!");
-                if (ranges.footerMidSecond == null)
-                    throw new Exception($"Could not find 'cellFooterMidSecond' key in " + _configPath + "!");
-                if (ranges.headerRight == null)
-                    throw new Exception($"Could not find 'cellHeaderRight' key in " + _configPath + "!");
-                if (ranges.headerLeft == null)
-                    throw new Exception($"Could not find 'cellHeaderLeft' key in " + _configPath + "!");
-                if (ranges.headerMid == null)
-                    throw new Exception($"Could not find 'cellHeaderMid' key in " + _configPath + "!");
-                if (ranges.printArea == null)
-                    throw new Exception($"Could not find 'printArea' key in " + _configPath + "!");
-
+        private async void PrintSelectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
                 // sheets to print
                 string sheetInput = InputTarief.Text;
                 if (InputTarief.Text.Length < 1)
                     throw new Exception($"Please provide Tarieven print range.");
 
+                // get sheet order
+                var sheetOrder = ExcelUtility.MultipleRange2List(sheetInput);
+
+                // progress
+                var progress = new Progress<int>(value => ProgressBar.Value = value);
+
+                // get catalog type
+                var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
+
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
 
+                // print
+                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw));
+            }
+            catch (Exception ex)
+            {
+                ProgressBar.Value = 0;
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, string catalogType, bool inclBtw)
+        {
+            try
+            {                
+                // get appconfig parameters
+                var parameters = GetConfigParameters();                
+
                 // check if files exists
-                if (!File.Exists(masterCatalog))
-                    throw new Exception($"Workbook " + masterCatalog + " not found!");
+                if (!File.Exists(parameters.masterCatalog))
+                    throw new Exception($"Workbook " + parameters.masterCatalog + " not found!");
 
                 // decrypt password
-                string password = HashUtil.Decrypt(hash);
-
-                // get catalog type
-                string catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
+                string password = HashUtil.Decrypt(parameters.hash);
 
                 // progress update
-                ((IProgress<int>)progress).Report(5);
+                progress.Report(5);                
 
-                await Task.Run(() => ExcelUtility.ExportWorkbook2Pdf(progress, masterCatalog, password, catalogType, 
-                    outputPath, sheetInput, ranges, inclBtw));
+                // export to pdf
+                ExcelUtility.ExportWorkbook2Pdf(progress, parameters, password, catalogType,
+                    sheetOrder, inclBtw);
 
                 // progress update
-                ((IProgress<int>)progress).Report(0);
+                progress.Report(0);
             }
 
             catch (Exception ex)
             {
-                ProgressBar.Value = 0;
                 MessageBox.Show(ex.Message);
             }
         }
@@ -183,6 +238,5 @@ namespace CatalogPrinterApp
         {
             e.Handled = IsTextInputAllowed(e.Text);
         }
-
     }
 }
