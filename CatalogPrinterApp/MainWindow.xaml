@@ -60,8 +60,8 @@
             <ProgressBar Name="ProgressBar" Grid.Row="5" Grid.ColumnSpan="2" Visibility="Visible" Height="20" Margin="0,5,0,5" VerticalAlignment="Center" HorizontalAlignment="Center"  Width="300" Background="Transparent" BorderBrush="{StaticResource ThemeColorBrush}" Foreground="{DynamicResource ThemeColorBrush}" BorderThickness="1" IsIndeterminate="False" Value="{Binding InsertBindingHere}" />
             <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Text="{Binding ElementName=ProgressBar, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
             <Grid Grid.Row="6" Grid.ColumnSpan="2" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
-            <Button Grid.Row="7" Grid.ColumnSpan="2" Name="PrintButton" Content="Print" Width="220" Height="36" Margin="10,10,10,10" TabIndex="8" FontSize="20" FontFamily="Segoe UI Semilight" Click="PrintButton_Click" />
-            
+            <Button Grid.Row="7" Grid.Column="0" Name="PrintSelectionButton" Content="Print Selection" Width="220" Height="36" Margin="10,10,10,10" TabIndex="8" FontSize="20" FontFamily="Segoe UI Semilight" Click="PrintSelectionButton_Click" />
+            <Button Grid.Row="7" Grid.Column="1" Name="PrintAllButton" Content="Print Full Catalog" Width="220" Height="36" Margin="10,10,10,10" TabIndex="8" FontSize="20" FontFamily="Segoe UI Semilight" Click="PrintAllButton_Click" Background="{DynamicResource MainWhiteFontColor}" Foreground="{DynamicResource ThemeColorBrush}" />
         </Grid>
     </Border>
 </Window>
