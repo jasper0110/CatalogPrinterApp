@@ -333,6 +333,9 @@ namespace ExcelUtil
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
 
+                    // unprotect worksheet
+                    MasterWb.Sheets[shName].Unprotect();
+
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
                     // set btw
