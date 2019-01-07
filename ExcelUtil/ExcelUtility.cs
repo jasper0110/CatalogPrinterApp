@@ -270,7 +270,8 @@ namespace ExcelUtil
                     MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                     //format sheet
-                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, parameters.ranges.printArea);
+                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, 
+                        centerFooterSecond, rightFooter, parameters.ranges.printArea);
 
                     // copy sheet
                     if (printFullCatalog && catalogTypeInt == (int)CatalogType.PARTICULIER)
@@ -291,7 +292,8 @@ namespace ExcelUtil
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                         //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, 
+                            centerFooterSecond, rightFooter, parameters.ranges.printArea);
                     }
 
                     // progress update
