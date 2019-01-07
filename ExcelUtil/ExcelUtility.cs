@@ -203,6 +203,7 @@ namespace ExcelUtil
                 MasterWb = ExcelUtility.GetWorkbook(parameters.masterCatalog, password);
 
                 // get correct sheet order
+                bool printFullCatalog = sheetOrder == null;
                 sheetOrder = GetSheetOrder(sheetOrder, parameters, catalogType);            
 
                 // open temp workbook to which the sheets of interest are copied to
@@ -271,8 +272,8 @@ namespace ExcelUtil
                     //format sheet
                     FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, parameters.ranges.printArea);
 
-                    /*// copy sheet
-                    if (catalogTypeInt == (int)CatalogType.PARTICULIER)
+                    // copy sheet
+                    if (printFullCatalog && catalogTypeInt == (int)CatalogType.PARTICULIER)
                     {
                         // set btw false
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
@@ -291,7 +292,7 @@ namespace ExcelUtil
 
                         //format sheet
                         FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
-                    }*/
+                    }
 
                     // progress update
                     progressSheets += incr;
