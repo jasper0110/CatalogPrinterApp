@@ -48,9 +48,10 @@ namespace CatalogPrinterApp
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
             var appSettings = config.GetSection("appSettings") as AppSettingsSection;
             // get config value
-            string pathEncryptorApp = appSettings.Settings["pathEncryptorApp"].Value;
+            string pathEncryptorApp = GetConfigValue("pathEncryptorApp", appSettings);
 
-            ProcessStartInfo startInfo = new ProcessStartInfo();
+            // start new process
+             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = true;
             startInfo.WorkingDirectory = Environment.CurrentDirectory;
             startInfo.FileName = pathEncryptorApp;
@@ -62,7 +63,7 @@ namespace CatalogPrinterApp
             }
             catch (System.ComponentModel.Win32Exception ex)
             {
-                return;
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -78,9 +79,17 @@ namespace CatalogPrinterApp
             Application.Current.Shutdown();
         }
 
+        private string GetConfigValue(string value, AppSettingsSection appSettings)
+        {
+            var result = appSettings.Settings[value]?.Value;
+            if (result == null)
+                throw new Exception($"Could not find '{value}' key in " + _configPath + "!");
+            return result;
+        }
+
         private AppParameters GetConfigParameters()
         {
-            var settings = new AppParameters();
+            var parameters = new AppParameters();
 
             // open config
             if (!File.Exists(_configPath))
@@ -90,58 +99,26 @@ namespace CatalogPrinterApp
             Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
             var appSettings = config.GetSection("appSettings") as AppSettingsSection;
             // get config values
-            settings.hash = appSettings.Settings["key"]?.Value;
-            settings.masterCatalog = appSettings.Settings["masterCatalog"]?.Value;
-            settings.outputPath = appSettings.Settings["outputPath"]?.Value;
+            parameters.hash = GetConfigValue("key", appSettings);
+            parameters.masterCatalog = GetConfigValue("masterCatalog", appSettings);
+            parameters.outputPath = GetConfigValue("outputPath", appSettings);
 
             var ranges = new InputRanges();
-            ranges.catalogType = appSettings.Settings["cellCatalogType"]?.Value;
-            ranges.btw = appSettings.Settings["cellBtw"]?.Value;
-            ranges.footerRight = appSettings.Settings["cellFooterRight"]?.Value;
-            ranges.footerLeft = appSettings.Settings["cellFooterLeft"]?.Value;
-            ranges.footerMidFirst = appSettings.Settings["cellFooterMidFirst"]?.Value;
-            ranges.footerMidSecond = appSettings.Settings["cellFooterMidSecond"]?.Value;
-            ranges.headerRight = appSettings.Settings["cellHeaderRight"]?.Value;
-            ranges.headerLeft = appSettings.Settings["cellHeaderLeft"]?.Value;
-            ranges.headerMid = appSettings.Settings["cellHeaderMid"]?.Value;
-            ranges.printArea = appSettings.Settings["printArea"]?.Value;
+            ranges.catalogType = GetConfigValue("cellCatalogType", appSettings);
+            ranges.btw = GetConfigValue("cellBtw", appSettings);
+            ranges.footerRight = GetConfigValue("cellFooterRight", appSettings);
+            ranges.footerLeft = GetConfigValue("cellFooterLeft", appSettings);
+            ranges.footerMidFirst = GetConfigValue("cellFooterMidFirst", appSettings);
+            ranges.footerMidSecond = GetConfigValue("cellFooterMidSecond", appSettings);
+            ranges.headerRight = GetConfigValue("cellHeaderRight", appSettings);
+            ranges.headerLeft = GetConfigValue("cellHeaderLeft", appSettings);
+            ranges.headerMid = GetConfigValue("cellHeaderMid", appSettings);
+            ranges.printArea = GetConfigValue("printArea", appSettings);
+            parameters.ranges = ranges;
 
-            settings.ranges = ranges;
+            parameters.sheetSummaryName = GetConfigValue("sheetSummaryName", appSettings);           
 
-            settings.sheetSummaryName = appSettings.Settings["sheetSummaryName"]?.Value;
-
-            if (settings.hash == null)
-                throw new Exception($"Could not find 'password' key in " + _configPath + "!");
-            if (settings.masterCatalog == null)
-                throw new Exception($"Could not find 'masterCatalog' key in " + _configPath + "!");
-            if (settings.outputPath == null)
-                throw new Exception($"Could not find 'outputPath' key in " + _configPath + "!");
-
-            if (ranges.catalogType == null)
-                throw new Exception($"Could not find 'cellCatalogType' key in " + _configPath + "!");
-            if (ranges.btw == null)
-                throw new Exception($"Could not find 'cellBtw' key in " + _configPath + "!");
-            if (ranges.footerRight == null)
-                throw new Exception($"Could not find 'cellFooterRight' key in " + _configPath + "!");
-            if (ranges.footerLeft == null)
-                throw new Exception($"Could not find 'cellFooterLeft' key in " + _configPath + "!");
-            if (ranges.footerMidFirst == null)
-                throw new Exception($"Could not find 'cellFooterMidFirst' key in " + _configPath + "!");
-            if (ranges.footerMidSecond == null)
-                throw new Exception($"Could not find 'cellFooterMidSecond' key in " + _configPath + "!");
-            if (ranges.headerRight == null)
-                throw new Exception($"Could not find 'cellHeaderRight' key in " + _configPath + "!");
-            if (ranges.headerLeft == null)
-                throw new Exception($"Could not find 'cellHeaderLeft' key in " + _configPath + "!");
-            if (ranges.headerMid == null)
-                throw new Exception($"Could not find 'cellHeaderMid' key in " + _configPath + "!");
-            if (ranges.printArea == null)
-                throw new Exception($"Could not find 'printArea' key in " + _configPath + "!");
-
-            if (settings.sheetSummaryName == null)
-                throw new Exception($"Could not find 'sheetSummaryName' key in " + _configPath + "!");
-
-            return settings;
+            return parameters;
         }
 
         private async void PrintAllButton_Click(object sender, RoutedEventArgs e)
@@ -177,7 +154,7 @@ namespace CatalogPrinterApp
                     throw new Exception($"Please provide Tarieven print range.");
 
                 // get sheet order
-                var sheetOrder = ExcelUtility.MultipleRange2List(sheetInput);
+                var sheetOrder = ConverterUtility.MultipleRange2List(sheetInput);
 
                 // progress
                 var progress = new Progress<int>(value => ProgressBar.Value = value);
@@ -199,34 +176,26 @@ namespace CatalogPrinterApp
         }
 
         private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, string catalogType, bool inclBtw)
-        {
-            try
-            {                
-                // get appconfig parameters
-                var parameters = GetConfigParameters();                
+        {              
+            // get appconfig parameters
+            var parameters = GetConfigParameters();                
 
-                // check if files exists
-                if (!File.Exists(parameters.masterCatalog))
-                    throw new Exception($"Workbook " + parameters.masterCatalog + " not found!");
+            // check if files exists
+            if (!File.Exists(parameters.masterCatalog))
+                throw new Exception($"Workbook " + parameters.masterCatalog + " not found!");
 
-                // decrypt password
-                string password = HashUtil.Decrypt(parameters.hash);
+            // decrypt password
+            string password = HashUtil.Decrypt(parameters.hash);
 
-                // progress update
-                progress.Report(5);                
+            // progress update
+            progress.Report(5);                
 
-                // export to pdf
-                ExcelUtility.ExportWorkbook2Pdf(progress, parameters, password, catalogType,
-                    sheetOrder, inclBtw);
+            // export to pdf
+            ExcelUtility.ExportWorkbook2Pdf(progress, parameters, password, catalogType,
+                sheetOrder, inclBtw);
 
-                // progress update
-                progress.Report(0);
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+            // progress update
+            progress.Report(0);
         }
 
         private static readonly Regex _regex = new Regex("[^0-9;-]+");

@@ -76,67 +76,6 @@ namespace ExcelUtil
             }
         }
 
-        private static List<string> Range2List(string range)
-        {
-            var list = new List<string>();
-
-            var first = range.Substring(0, range.IndexOf("-"));
-            var second = range.Substring(range.IndexOf("-") + 1);
-
-            var firstInt = 0;
-            var secondInt = 0;
-            if (!Int32.TryParse(first, out firstInt))
-                throw new Exception($"Parse exception for sheet input " + first + " from range " + range + "! Please check sheet input.");
-            if (!Int32.TryParse(second, out secondInt))
-                throw new Exception($"Parse exception for sheet input " + second + " from range " + range + "! Please check sheet input.");
-
-            for (int i = firstInt; i <= secondInt; ++i)
-                list.Add(i.ToString());
-
-            return list;
-        }
-
-        public static List<string> MultipleRange2List(string sheetInput)
-        {
-            var sheets2Print = new List<string>();
-
-            var sheets = sheetInput.Split(';').ToList();
-            foreach (var sheet in sheets)
-            {
-                if (sheet.Contains("-"))
-                {
-                    sheets2Print.AddRange(Range2List(sheet));
-                }
-                else
-                {
-                    if (sheet.Length > 0)
-                        sheets2Print.Add(sheet);
-                }
-            }
-            return sheets2Print;
-        }
-
-        public static KeyValuePair<int, int> StringRange2Coordinate(string range)
-        {
-            var column = new string(range.TakeWhile(char.IsUpper).ToArray());
-            if (column.Length < 1)
-                return new KeyValuePair<int, int>(0,0);
-
-            var row = range.Substring(column.Length);
-
-            int columnInt = 0;
-            foreach(char c in column)
-            {
-                columnInt += char.ToUpper(c) - 64;
-            }
-
-            int rowInt = 0;
-            if(!Int32.TryParse(row, out rowInt))
-                throw new Exception($"Parse exception for row " + row + " from range " + range + "!");
-
-            return new KeyValuePair<int, int>(rowInt, columnInt);
-        }
-
         public static void ChangePassword(string wbFullName, string oldPassword, string newPassword)
         {
             Workbook wb = ExcelUtility.GetWorkbook(wbFullName, oldPassword);
@@ -210,6 +149,51 @@ namespace ExcelUtil
             return false;
         }
 
+        public static List<string> GetSheetOrder(List<string> sheetOrder, AppParameters parameters, string catalogType)
+        {
+            if (sheetOrder == null)
+            {
+                if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
+                    throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
+                        "\nPlease check the name of the summary sheet.");
+                var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
+                int columnInt = -1;
+                for (int i = 1; i <= 100; ++i)
+                {
+                    var str = header[1, i];
+                    if (str == catalogType)
+                    {
+                        columnInt = i;
+                        break;
+                    }
+                }
+
+                if (columnInt < 0)
+                    throw new Exception($"Catalog type " + catalogType + " not found in worksheet " + parameters.sheetSummaryName + "!" +
+                        "\nPlease check the name of the summary sheet and if the catalog type exists in the sheet.");
+
+                char columnChar = (char)(columnInt + 64);
+                string rankRange = columnChar + ":" + columnChar;
+                var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
+                var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
+
+                var nWorksheets = MasterWb.Sheets.Count;
+                var sheetOrderDict = new SortedDictionary<int, string>();
+                for (int i = 2; i <= nWorksheets; ++i)
+                {
+                    var rank = Convert.ToInt32(sheetRank[i, 1]);
+                    var name = Convert.ToString(sheetName[i, 1]);
+                    // check if item already exists
+                    // add parse safety for rank and name
+                    if (rank > 0 && name != null)
+                        sheetOrderDict[rank] = name;
+                }
+                sheetOrder = sheetOrderDict.Values.ToList();
+            }
+
+            return sheetOrder;
+        }
+
         public static void ExportWorkbook2Pdf(IProgress<int> progress, AppParameters parameters, string password, string catalogType, 
             List<string> sheetOrder, bool inclBtw)
         {
@@ -218,46 +202,8 @@ namespace ExcelUtil
                 // open master workbook
                 MasterWb = ExcelUtility.GetWorkbook(parameters.masterCatalog, password);
 
-                if (sheetOrder == null)
-                {
-                    if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
-                        throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
-                            "\nPlease check the name of the summary sheet.");
-                    var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
-                    int columnInt = -1;
-                    for (int i = 1; i <= 100; ++i)
-                    {
-                        var str = header[1, i];
-                        if (str == catalogType)
-                        {
-                            columnInt = i;
-                            break;
-                        }
-                    }
-
-                    if (columnInt < 0)
-                        throw new Exception($"Catalog type " + catalogType + " not found in worksheet " + parameters.sheetSummaryName + "!" +
-                            "\nPlease check the name of the summary sheet and if the catalog type exists in the sheet.");
-
-                    char columnChar = (char)(columnInt + 64);
-                    string rankRange = columnChar + ":" + columnChar;
-                    var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
-                    var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
-
-                    var nWorksheets = MasterWb.Sheets.Count;
-                    var sheetOrderDict = new SortedDictionary<int, string>();                    
-                    for (int i = 2; i <= nWorksheets; ++i)
-                    {
-                        var rank = Convert.ToInt32(sheetRank[i, 1]);
-                        var name = Convert.ToString(sheetName[i, 1]);
-                        // check if item already exists
-                        // add parse safety for rank and name
-                        if (rank > 0 && name != null)
-                            sheetOrderDict[rank] = name;
-                    }
-                    sheetOrder = sheetOrderDict.Values.ToList();
-                }
-                
+                // get correct sheet order
+                sheetOrder = GetSheetOrder(sheetOrder, parameters, catalogType);            
 
                 // open temp workbook to which the sheets of interest are copied to
                 Wb2Print = ExcelUtility.XlApp.Workbooks.Add();
@@ -268,60 +214,19 @@ namespace ExcelUtil
                 // progress update
                 progress.Report(30);
 
-                string leftHeader = "", centerHeader = "", rightHeader = "", leftFooter = "", centerFooterFirst = "", centerFooterSecond = "", rightFooter = "";
+                var cellFooterRight = ConverterUtility.StringRange2Coordinate(parameters.ranges.footerRight, nameof(parameters.ranges.footerRight));
+                var cellFooterLeft = ConverterUtility.StringRange2Coordinate(parameters.ranges.footerLeft, nameof(parameters.ranges.footerLeft));
+                var cellFooterMidFirst = ConverterUtility.StringRange2Coordinate(parameters.ranges.footerMidFirst, nameof(parameters.ranges.footerMidFirst));
+                var cellFooterMidSecond = ConverterUtility.StringRange2Coordinate(parameters.ranges.footerMidSecond, nameof(parameters.ranges.footerMidSecond));
+                var cellHeaderRight = ConverterUtility.StringRange2Coordinate(parameters.ranges.headerRight, nameof(parameters.ranges.headerRight));
+                var cellHeaderLeft = ConverterUtility.StringRange2Coordinate(parameters.ranges.headerLeft, nameof(parameters.ranges.headerLeft));
+                var cellHeaderMid = ConverterUtility.StringRange2Coordinate(parameters.ranges.headerMid, nameof(parameters.ranges.headerMid));
 
-                var cellFooterRight = StringRange2Coordinate(parameters.ranges.footerRight);
-                if (cellFooterRight.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterRight: " + parameters.ranges.footerRight + "!");
-                var cellFooterLeft = StringRange2Coordinate(parameters.ranges.footerLeft);
-                if (cellFooterLeft.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterLeft: " + parameters.ranges.footerLeft + "!");
-                var cellFooterMidFirst = StringRange2Coordinate(parameters.ranges.footerMidFirst);
-                if (cellFooterMidFirst.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterMidFirst: " + parameters.ranges.footerMidFirst + "!");
-                var cellFooterMidSecond = StringRange2Coordinate(parameters.ranges.footerMidSecond);
-                if (cellFooterMidSecond.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellFooterMidSecond: " + parameters.ranges.footerMidSecond + "!");
-                var cellHeaderRight = StringRange2Coordinate(parameters.ranges.headerRight);
-                if (cellHeaderRight.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderRight: " + parameters.ranges.headerRight + "!");
-                var cellHeaderLeft = StringRange2Coordinate(parameters.ranges.headerLeft);
-                if (cellHeaderLeft.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderLeft: " + parameters.ranges.headerLeft + "!");
-                var cellHeaderMid = StringRange2Coordinate(parameters.ranges.headerMid);
-                if (cellHeaderMid.Key == 0)
-                    throw new Exception($"Invalid input for cell range cellHeaderMid: " + parameters.ranges.headerMid + "!");
-
-                var cellCatalogType = StringRange2Coordinate(parameters.ranges.catalogType);
-                var cellBtw = StringRange2Coordinate(parameters.ranges.btw);
+                var cellCatalogType = ConverterUtility.StringRange2Coordinate(parameters.ranges.catalogType, nameof(parameters.ranges.catalogType));
+                var cellBtw = ConverterUtility.StringRange2Coordinate(parameters.ranges.btw, nameof(parameters.ranges.btw));
 
                 // catalog int type
-                int catalogTypeInt;
-                switch (catalogType)
-                {
-                    case "Particulier":
-                        catalogTypeInt = (int)CatalogType.PARTICULIER;
-                        break;
-                    case "Dakwerker":
-                        catalogTypeInt = (int)CatalogType.DAKWERKER;
-                        break;
-                    case "Veranda":
-                        catalogTypeInt = (int)CatalogType.VERANDA;
-                        break;
-                    case "Aannemer":
-                        catalogTypeInt = (int)CatalogType.AANNEMER;
-                        break;
-                    case "Blanco":
-                        catalogTypeInt = (int)CatalogType.BLANCO;
-                        break;
-                    case "Stock":
-                        catalogTypeInt = (int)CatalogType.STOCK;
-                        break;
-                    default:
-                        catalogTypeInt = 0;
-                        break;
-                   
-                }
+                int catalogTypeInt = ConverterUtility.StringCatalogType2Int(catalogType);                
 
                 double progressSheets = 30.0;
                 double incr = 70.0 / (double)sheetOrder.Count;
@@ -349,13 +254,13 @@ namespace ExcelUtil
                     }
 
                     // get headers and footers
-                    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                    rightFooter = "TARIEF Nr. " + shName;
+                    string leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                    string centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                    string rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
+                    string leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                    string centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                    string centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
+                    string rightFooter = "TARIEF Nr. " + shName;
 
                     // unhide all columns
                     MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
@@ -366,27 +271,27 @@ namespace ExcelUtil
                     //format sheet
                     FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, parameters.ranges.printArea);
 
-                    //// copy sheet
-                    //if (catalogTypeInt == (int)CatalogType.PARTICULIER)
-                    //{
-                    //    // set btw false
-                    //    MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+                    /*// copy sheet
+                    if (catalogTypeInt == (int)CatalogType.PARTICULIER)
+                    {
+                        // set btw false
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
 
-                    //    // get headers and footers
-                    //    leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                    //    centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                    //    rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                    //    leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                    //    centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                    //    centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                    //    rightFooter = "TARIEF Nr. " + shName;
+                        // get headers and footers
+                        leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
+                        centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
+                        rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
+                        leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
+                        centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
+                        centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
+                        rightFooter = "TARIEF Nr. " + shName;
 
-                    //    // copy sheet
-                    //    MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+                        // copy sheet
+                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
-                    //    //format sheet
-                    //    FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
-                    //}
+                        //format sheet
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, centerFooterSecond, rightFooter, ranges.printArea);
+                    }*/
 
                     // progress update
                     progressSheets += incr;
