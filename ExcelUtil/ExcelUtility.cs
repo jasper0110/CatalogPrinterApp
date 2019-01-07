@@ -245,7 +245,7 @@ namespace ExcelUtil
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
                     // set btw
-                    if (inclBtw)
+                    if (inclBtw || (printFullCatalog && catalogTypeInt == (int)CatalogType.PARTICULIER))
                     {
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
                     }
