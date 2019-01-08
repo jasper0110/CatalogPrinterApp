@@ -125,6 +125,12 @@ namespace CatalogPrinterApp
         {
             try
             {
+                // pages to print
+                List<string> sheetOrder = null;
+                string sheetInput = InputPages.Text;
+                if (InputPages.Text.Length > 0)
+                    sheetOrder = ConverterUtility.MultipleRange2List(sheetInput);
+
                 // progress
                 var progress = new Progress<int>(value => ProgressBar.Value = value);
 
@@ -135,7 +141,7 @@ namespace CatalogPrinterApp
                 bool inclBtw = InputBTW.IsChecked ?? false;
 
                 // print
-                await Task.Run(() => PrintCatalog(null, progress, catalogType, inclBtw));
+                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, false));
             }
             catch (Exception ex)
             {
@@ -175,7 +181,8 @@ namespace CatalogPrinterApp
             }
         }
 
-        private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, string catalogType, bool inclBtw)
+        private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, 
+            string catalogType, bool inclBtw, bool printTarieven = true)
         {              
             // get appconfig parameters
             var parameters = GetConfigParameters();                
@@ -192,7 +199,7 @@ namespace CatalogPrinterApp
 
             // export to pdf
             ExcelUtility.ExportWorkbook2Pdf(progress, parameters, password, catalogType,
-                sheetOrder, inclBtw);
+                sheetOrder, inclBtw, printTarieven);
 
             // progress update
             progress.Report(0);
