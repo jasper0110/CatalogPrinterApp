@@ -149,53 +149,51 @@ namespace ExcelUtil
             return false;
         }
 
-        public static List<string> GetSheetOrder(List<string> sheetOrder, AppParameters parameters, string catalogType)
+        public static List<string> GetSheetOrder(AppParameters parameters, string catalogType)
         {
-            if (sheetOrder == null)
+            var sheetOrder = new List<string>();
+
+            if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
+                throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
+                    "\nPlease check the name of the summary sheet.");
+            var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
+            int columnInt = -1;
+            for (int i = 1; i <= 100; ++i)
             {
-                if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
-                    throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
-                        "\nPlease check the name of the summary sheet.");
-                var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
-                int columnInt = -1;
-                for (int i = 1; i <= 100; ++i)
+                var str = header[1, i];
+                if (str == catalogType)
                 {
-                    var str = header[1, i];
-                    if (str == catalogType)
-                    {
-                        columnInt = i;
-                        break;
-                    }
+                    columnInt = i;
+                    break;
                 }
-
-                if (columnInt < 0)
-                    throw new Exception($"Catalog type " + catalogType + " not found in worksheet " + parameters.sheetSummaryName + "!" +
-                        "\nPlease check the name of the summary sheet and if the catalog type exists in the sheet.");
-
-                char columnChar = (char)(columnInt + 64);
-                string rankRange = columnChar + ":" + columnChar;
-                var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
-                var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
-
-                var nWorksheets = MasterWb.Sheets.Count;
-                var sheetOrderDict = new SortedDictionary<int, string>();
-                for (int i = 2; i <= nWorksheets; ++i)
-                {
-                    var rank = Convert.ToInt32(sheetRank[i, 1]);
-                    var name = Convert.ToString(sheetName[i, 1]);
-                    // check if item already exists
-                    // add parse safety for rank and name
-                    if (rank > 0 && name != null)
-                        sheetOrderDict[rank] = name;
-                }
-                sheetOrder = sheetOrderDict.Values.ToList();
             }
+
+            if (columnInt < 0)
+                throw new Exception($"Catalog type " + catalogType + " not found in worksheet " + parameters.sheetSummaryName + "!" +
+                    "\nPlease check the name of the summary sheet and if the catalog type exists in the sheet.");
+
+            char columnChar = (char)(columnInt + 64);
+            string rankRange = columnChar + ":" + columnChar;
+            var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
+            var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
+
+            var sheetOrderDict = new SortedDictionary<int, string>();
+            for (int i = 2; i < 1000; ++i)
+            {
+                var rank = Convert.ToInt32(sheetRank[i, 1]);
+                var name = Convert.ToString(sheetName[i, 1]);
+                // check if item already exists
+                // add parse safety for rank and name
+                if (rank > 0 && name != null)
+                    sheetOrderDict[rank] = name;
+            }
+            sheetOrder = sheetOrderDict.Values.ToList();
 
             return sheetOrder;
         }
 
-        public static void ExportWorkbook2Pdf(IProgress<int> progress, AppParameters parameters, string password, string catalogType, 
-            List<string> sheetOrder, bool inclBtw)
+        public static void ExportWorkbook2Pdf(IProgress<int> progress, AppParameters parameters, 
+            string password, string catalogType, List<string> sheetOrder, bool inclBtw, bool printTarieven = true)
         {
             try
             {
@@ -203,8 +201,25 @@ namespace ExcelUtil
                 MasterWb = ExcelUtility.GetWorkbook(parameters.masterCatalog, password);
 
                 // get correct sheet order
-                bool printFullCatalog = sheetOrder == null;
-                sheetOrder = GetSheetOrder(sheetOrder, parameters, catalogType);            
+                if(!printTarieven)
+                {
+                    if(sheetOrder != null)
+                    {
+                        var sheetsToPrint = sheetOrder.Select(x => Int32.Parse(x)).ToList();                        
+                        var allSheetOrder = GetSheetOrder(parameters, catalogType);
+                        if (sheetsToPrint.Max() > allSheetOrder.Count)
+                        {
+                            throw new Exception($"Attempting to print page number {sheetsToPrint.Max()}, " +
+                                $"but only found {allSheetOrder.Count} given sheets.");
+                        }
+                        sheetOrder = sheetsToPrint.Select(x => allSheetOrder[x-1]).ToList();
+                    }
+                    else
+                    {
+                        sheetOrder = GetSheetOrder(parameters, catalogType);
+                    }
+                }
+                               
 
                 // open temp workbook to which the sheets of interest are copied to
                 Wb2Print = ExcelUtility.XlApp.Workbooks.Add();
@@ -245,7 +260,7 @@ namespace ExcelUtil
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
                     // set btw
-                    if (inclBtw || (printFullCatalog && catalogTypeInt == (int)CatalogType.PARTICULIER))
+                    if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
                     {
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
                     }
@@ -274,7 +289,7 @@ namespace ExcelUtil
                         centerFooterSecond, rightFooter, parameters.ranges.printArea);
 
                     // copy sheet
-                    if (printFullCatalog && catalogTypeInt == (int)CatalogType.PARTICULIER)
+                    if (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER)
                     {
                         // set btw false
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
@@ -327,8 +342,10 @@ namespace ExcelUtil
             }
             catch (Exception ex)
             {
-                ExcelUtility.CloseWorkbook(MasterWb, false);
-                ExcelUtility.CloseWorkbook(Wb2Print, true);
+                if(MasterWb != null)
+                    ExcelUtility.CloseWorkbook(MasterWb, false);
+                if(Wb2Print != null)
+                    ExcelUtility.CloseWorkbook(Wb2Print, true);
                 //File.Delete(_tmpWorkbookDir + _tmpWokbookName);
 
                 ExcelUtility.CloseExcel();
