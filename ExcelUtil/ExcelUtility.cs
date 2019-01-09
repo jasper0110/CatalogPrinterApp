@@ -47,34 +47,34 @@ namespace ExcelUtil
         public static readonly string _tmpWorkbookDir = @"C:\temp";
         public static readonly string _tmpWokbookName = @"temp.xlsx";
 
-        public static Workbook MasterWb { get; set; }
-        public static Workbook Wb2Print { get; set; }
-
-        public static Application XlApp { get
+        private static Application OpenApplication()
+        {
+            try
             {
-                try
+                var excel = (Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
+                excel.DisplayAlerts = false;
+                excel.Visible = false;
+                return excel;
+            }
+            catch (Exception ex)
+            {
+                if (ex.ToString().Contains("0x800401E3 (MK_E_UNAVAILABLE)"))
                 {
-                    var excel = (Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
+                    var excel = new Application();
                     excel.DisplayAlerts = false;
                     excel.Visible = false;
                     return excel;
                 }
-                catch (Exception ex)
+                else
                 {
-                    if (ex.ToString().Contains("0x800401E3 (MK_E_UNAVAILABLE)"))
-                    {
-                        var excel = new Application();
-                        excel.DisplayAlerts = false;
-                        excel.Visible = false;
-                        return excel;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
             }
         }
+
+        public static Application XlApp { get; set; } = null;
+        public static Workbook MasterWb { get; set; } = null;
+        public static Workbook Wb2Print { get; set; } = null;
 
         public static void ChangePassword(string wbFullName, string oldPassword, string newPassword)
         {
@@ -90,9 +90,9 @@ namespace ExcelUtil
             try
             {
                 if (password != null)
-                    return XlApp.Workbooks.Open(fullName, Password: password);
+                    return XlApp?.Workbooks?.Open(fullName, Password: password);
 
-                return XlApp.Workbooks.Open(fullName);
+                return XlApp?.Workbooks?.Open(fullName);
             }
             catch (Exception ex)
             {
@@ -117,8 +117,11 @@ namespace ExcelUtil
 
         public static void CloseExcel()
         {
-            XlApp.Quit();
-            Marshal.ReleaseComObject(XlApp);
+            if (XlApp != null)
+            {
+                XlApp.Quit();
+                Marshal.ReleaseComObject(XlApp);
+            }
         }
 
         public static bool IsFileInUse(string path)
@@ -197,8 +200,12 @@ namespace ExcelUtil
         {
             try
             {
+                // open application
+                if (XlApp == null)
+                    XlApp = OpenApplication();
+
                 // open master workbook
-                MasterWb = ExcelUtility.GetWorkbook(parameters.masterCatalog, password);
+                MasterWb = GetWorkbook(parameters.masterCatalog, password);
 
                 // get correct sheet order
                 if(!printTarieven)
@@ -222,7 +229,7 @@ namespace ExcelUtil
                                
 
                 // open temp workbook to which the sheets of interest are copied to
-                Wb2Print = ExcelUtility.XlApp.Workbooks.Add();
+                Wb2Print = XlApp?.Workbooks.Add();
                 if (!Directory.Exists(_tmpWorkbookDir))
                     Directory.CreateDirectory(_tmpWorkbookDir);
                 Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
@@ -343,12 +350,12 @@ namespace ExcelUtil
             catch (Exception ex)
             {
                 if(MasterWb != null)
-                    ExcelUtility.CloseWorkbook(MasterWb, false);
+                    CloseWorkbook(MasterWb, false);
                 if(Wb2Print != null)
-                    ExcelUtility.CloseWorkbook(Wb2Print, true);
+                    CloseWorkbook(Wb2Print, true);
                 //File.Delete(_tmpWorkbookDir + _tmpWokbookName);
 
-                ExcelUtility.CloseExcel();
+                CloseExcel();
                 throw new Exception(ex.Message);
             }
         }
@@ -370,12 +377,12 @@ namespace ExcelUtil
             sh.PageSetup.CenterVertically = true;
             sh.PageSetup.CenterHorizontally = true;
 
-            sh.PageSetup.LeftMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
-            sh.PageSetup.RightMargin = ExcelUtility.XlApp.InchesToPoints(0.5);
-            sh.PageSetup.TopMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.BottomMargin = ExcelUtility.XlApp.InchesToPoints(0.7);
-            sh.PageSetup.HeaderMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
-            sh.PageSetup.FooterMargin = ExcelUtility.XlApp.InchesToPoints(0.3);
+            sh.PageSetup.LeftMargin = XlApp?.InchesToPoints(0.5) ?? 0.0;
+            sh.PageSetup.RightMargin = XlApp?.InchesToPoints(0.5) ?? 0.0;
+            sh.PageSetup.TopMargin = XlApp?.InchesToPoints(0.7) ?? 0.0;
+            sh.PageSetup.BottomMargin = XlApp?.InchesToPoints(0.7) ?? 0.0;
+            sh.PageSetup.HeaderMargin = XlApp?.InchesToPoints(0.3) ?? 0.0;
+            sh.PageSetup.FooterMargin = XlApp?.InchesToPoints(0.3) ?? 0.0;
         }
     }
 }
