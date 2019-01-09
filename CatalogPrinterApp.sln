@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLUtil", "XMLUtil\XMLUtil.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encrypter", "Encrypter\Encrypter.csproj", "{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolsApp", "ToolsApp\ToolsApp.csproj", "{E344BE15-0D3F-4611-8C25-17818DD3E528}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,8 +68,19 @@ Global
 		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Release|x86.ActiveCfg = Release|x86
 		{BDC4976E-85AE-4EE7-B32C-F85A2F47169D}.Release|x86.Build.0 = Release|x86
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Debug|x86.Build.0 = Debug|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Release|x86.ActiveCfg = Release|Any CPU
+		{E344BE15-0D3F-4611-8C25-17818DD3E528}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {306D1A50-28AE-4ABD-9076-23C85CC14247}
 	EndGlobalSection
 EndGlobal

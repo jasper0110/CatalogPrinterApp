@@ -39,26 +39,54 @@ namespace CatalogPrinterApp
             WindowState = WindowState.Minimized;
         }
 
-        private void Settings_OnClick(object sender, RoutedEventArgs e)
+        private void Tools_OnClick(object sender, RoutedEventArgs e)
         {
-            if (!File.Exists(_configPath))
-                throw new Exception($"Config file " + _configPath + " not found!");
-            ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-            configMap.ExeConfigFilename = _configPath;
-            Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-            var appSettings = config.GetSection("appSettings") as AppSettingsSection;
-            // get config value
-            string pathEncryptorApp = GetConfigValue("pathEncryptorApp", appSettings);
-
-            // start new process
-             ProcessStartInfo startInfo = new ProcessStartInfo();
-            startInfo.UseShellExecute = true;
-            startInfo.WorkingDirectory = Environment.CurrentDirectory;
-            startInfo.FileName = pathEncryptorApp;
-            startInfo.Verb = "runas";
-
             try
             {
+                if (!File.Exists(_configPath))
+                    throw new Exception($"Config file " + _configPath + " not found!");
+                ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+                configMap.ExeConfigFilename = _configPath;
+                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+                var appSettings = config.GetSection("appSettings") as AppSettingsSection;
+                // get config value
+                string pathToolsApp = GetConfigValue("pathToolsApp", appSettings);
+
+                // start new process
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.UseShellExecute = true;
+                startInfo.WorkingDirectory = Environment.CurrentDirectory;
+                startInfo.FileName = pathToolsApp;
+                startInfo.Verb = "runas";
+            
+                Process p = Process.Start(startInfo);
+            }
+            catch (System.ComponentModel.Win32Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void Settings_OnClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!File.Exists(_configPath))
+                    throw new Exception($"Config file " + _configPath + " not found!");
+                ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+                configMap.ExeConfigFilename = _configPath;
+                Configuration config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+                var appSettings = config.GetSection("appSettings") as AppSettingsSection;
+                // get config value
+                string pathEncryptorApp = GetConfigValue("pathEncryptorApp", appSettings);
+
+                // start new process
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                startInfo.UseShellExecute = true;
+                startInfo.WorkingDirectory = Environment.CurrentDirectory;
+                startInfo.FileName = pathEncryptorApp;
+                startInfo.Verb = "runas";
+            
                 Process p = Process.Start(startInfo);
             }
             catch (System.ComponentModel.Win32Exception ex)

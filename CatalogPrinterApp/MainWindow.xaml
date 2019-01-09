@@ -31,6 +31,9 @@
                 </StackPanel>
                 <Thumb Opacity="0" Background="Transparent" Foreground="{x:Null}" DragDelta="Thumb_OnDragDelta" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0">
+                    <Button ToolTip="Tools" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Tools_OnClick">
+                        <Image Source="tools.png" Height="18" Width="18" Style="{StaticResource UserControlImageStyle}" ></Image>
+                    </Button>
                     <Button ToolTip="Settings" Width="32" Height="28" Style="{StaticResource WindowActionButton}" Click="Settings_OnClick">
                         <Image Source="gears.png" Height="20" Width="20" Style="{StaticResource UserControlImageStyle}" ></Image>
                     </Button>
@@ -60,7 +63,7 @@
             <Label Grid.Row="4" Grid.Column="0" MinHeight="30" Content="Selectie Pagina's" Width="200" Margin="10,10,10,10" HorizontalAlignment="Left" Foreground="{DynamicResource MainBlackFontColor}" FontFamily="Segoe UI Semilight" FontSize="20" VerticalAlignment="Center"/>
             <TextBox x:Name="InputPages" PreviewTextInput="NumberValidationTextBox" Grid.Row="4" Grid.Column="1" Width="200" Margin="10,10,10,10" FontSize="20" CharacterCasing="Lower" FontFamily="Segoe UI Semilight" HorizontalAlignment="Right" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Top" />
             <CheckBox x:Name="InputBTW" Grid.Row="5" Grid.Column="0" Content="BTW" Margin="10,10,10,10" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" FontFamily="Segoe UI Semilight"/>
-            <ProgressBar Name="ProgressBar" Grid.Row="6" Grid.ColumnSpan="2" Visibility="Visible" Height="20" Margin="0,5,0,5" VerticalAlignment="Center" HorizontalAlignment="Center"  Width="300" Background="Transparent" BorderBrush="{StaticResource ThemeColorBrush}" Foreground="{DynamicResource ThemeColorBrush}" BorderThickness="1" IsIndeterminate="False" Value="{Binding InsertBindingHere}" />
+            <ProgressBar Name="ProgressBar" Grid.Row="6" Grid.ColumnSpan="2" Visibility="Visible" Height="20" Margin="0,10,0,10" VerticalAlignment="Center" HorizontalAlignment="Center"  Width="300" Background="Transparent" BorderBrush="{StaticResource ThemeColorBrush}" Foreground="{DynamicResource ThemeColorBrush}" BorderThickness="1" IsIndeterminate="False" Value="{Binding InsertBindingHere}" />
             <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Text="{Binding ElementName=ProgressBar, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" />
             <Grid Grid.Row="7" Grid.ColumnSpan="2" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
             <Button Grid.Row="8" Grid.Column="0" Name="PrintSelectionButton" Content="Print Tarieven" Width="220" Height="36" Margin="10,10,10,10" TabIndex="8" FontSize="20" FontFamily="Segoe UI Semilight" Click="PrintSelectionButton_Click" />
