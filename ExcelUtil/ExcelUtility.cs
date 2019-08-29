@@ -275,7 +275,8 @@ namespace ExcelUtil
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
                     // set korting
-                    MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
+                    if(korting > 0)
+                        MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
                     // set btw
                     if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
                     {

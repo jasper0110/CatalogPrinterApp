@@ -169,7 +169,11 @@ namespace CatalogPrinterApp
                 var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
                 // get korting
-                int.TryParse(InputKorting.Text, out int korting);
+                int korting = -1;
+                if (InputKorting.Text != null)
+                {
+                    int.TryParse(InputKorting.Text, out korting);
+                }
 
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
@@ -203,7 +207,11 @@ namespace CatalogPrinterApp
                 var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
                 // get korting
-                int.TryParse(InputKorting.Text, out int korting);
+                int korting = -1;
+                if (InputKorting.Text != null)
+                {
+                    int.TryParse(InputKorting.Text, out korting);
+                }
 
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
@@ -254,8 +262,15 @@ namespace CatalogPrinterApp
 
         private void KortingValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            int.TryParse(e.Text, out int i);
-            e.Handled = i >= 0 && i <= 100;
+            if (e.Text != null)
+            {
+                int.TryParse(e.Text, out int i);
+                e.Handled = i >= 0 && i <= 100;
+            }
+            else
+            {
+                e.Handled = true;
+            }
         }
     }
 }
