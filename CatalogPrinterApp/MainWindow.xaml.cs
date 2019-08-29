@@ -173,6 +173,8 @@ namespace CatalogPrinterApp
                 if (InputKorting.Text != null)
                 {
                     int.TryParse(InputKorting.Text, out korting);
+                    if (korting < 0 || korting >= 100)
+                        throw new Exception($"Please provide Korting >= 0 and < 100.");
                 }
 
                 // btw
@@ -211,6 +213,8 @@ namespace CatalogPrinterApp
                 if (InputKorting.Text != null)
                 {
                     int.TryParse(InputKorting.Text, out korting);
+                    if(korting < 0 || korting >= 100)
+                        throw new Exception($"Please provide Korting >= 0 and < 100.");
                 }
 
                 // btw
@@ -250,10 +254,11 @@ namespace CatalogPrinterApp
             progress.Report(0);
         }
 
-        private static readonly Regex _regex = new Regex("[^0-9;-]+");
+        private static readonly Regex _regexRange = new Regex("[^0-9;-]+");
+        private static readonly Regex _regexNumber = new Regex("[^0-9]+");
         private static bool IsTextInputAllowed(string text)
         {
-            return _regex.IsMatch(text);
+            return _regexRange.IsMatch(text);
         }
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
@@ -262,15 +267,7 @@ namespace CatalogPrinterApp
 
         private void KortingValidationTextBox(object sender, TextCompositionEventArgs e)
         {
-            if (e.Text != null)
-            {
-                int.TryParse(e.Text, out int i);
-                e.Handled = i >= 0 && i <= 100;
-            }
-            else
-            {
-                e.Handled = true;
-            }
+            e.Handled = _regexNumber.IsMatch(e.Text);
         }
     }
 }
