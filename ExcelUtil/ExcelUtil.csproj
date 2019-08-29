@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="ConverterUtility.cs" />
     <Compile Include="ExcelUtility.cs" />
+    <Compile Include="FormatData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

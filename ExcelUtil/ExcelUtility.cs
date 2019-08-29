@@ -23,6 +23,7 @@ namespace ExcelUtil
     {       
         public string catalogType;
         public string btw;
+        public string korting;
         public string footerRight;
         public string footerLeft;
         public string footerMidFirst;
@@ -195,8 +196,14 @@ namespace ExcelUtil
             return sheetOrder;
         }
 
-        public static void ExportWorkbook2Pdf(IProgress<int> progress, AppParameters parameters, 
-            string password, string catalogType, List<string> sheetOrder, bool inclBtw, bool printTarieven = true)
+        public static void ExportWorkbook2Pdf(IProgress<int> progress, 
+            AppParameters parameters, 
+            string password, 
+            string catalogType, 
+            List<string> sheetOrder,
+            bool inclBtw,
+            int korting,
+            bool printTarieven = true)
         {
             try
             {
@@ -246,6 +253,7 @@ namespace ExcelUtil
                 var cellHeaderMid = ConverterUtility.StringRange2Coordinate(parameters.ranges.headerMid, nameof(parameters.ranges.headerMid));
 
                 var cellCatalogType = ConverterUtility.StringRange2Coordinate(parameters.ranges.catalogType, nameof(parameters.ranges.catalogType));
+                var cellKorting = ConverterUtility.StringRange2Coordinate(parameters.ranges.korting, nameof(parameters.ranges.korting));
                 var cellBtw = ConverterUtility.StringRange2Coordinate(parameters.ranges.btw, nameof(parameters.ranges.btw));
 
                 // catalog int type
@@ -266,6 +274,8 @@ namespace ExcelUtil
 
                     // set catalog type
                     MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
+                    // set korting
+                    MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
                     // set btw
                     if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
                     {
@@ -276,7 +286,7 @@ namespace ExcelUtil
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
                     }
 
-                    // get headers and footers
+                    // get format data
                     string leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
                     string centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
                     string rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
@@ -284,6 +294,17 @@ namespace ExcelUtil
                     string centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
                     string centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
                     string rightFooter = "TARIEF Nr. " + shName;
+                    var fd = new FormatData
+                    {
+                        leftHeader = leftHeader,
+                        centerHeader = centerHeader,
+                        rightHeader = rightHeader,
+                        leftFooter = leftFooter,
+                        centerFooterFirst = centerFooterFirst,
+                        centerFooterSecond = centerFooterSecond,
+                        rightFooter = rightFooter,
+                        printArea = parameters.ranges.printArea
+                    };
 
                     // unhide all columns
                     MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
@@ -292,8 +313,7 @@ namespace ExcelUtil
                     MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                     //format sheet
-                    FormatSheet(Wb2Print.Sheets[shName], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, 
-                        centerFooterSecond, rightFooter, parameters.ranges.printArea);
+                    FormatSheet(Wb2Print.Sheets[shName], fd);
 
                     // copy sheet
                     if (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER)
@@ -301,7 +321,7 @@ namespace ExcelUtil
                         // set btw false
                         MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
 
-                        // get headers and footers
+                        // get format data
                         leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
                         centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
                         rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
@@ -309,13 +329,23 @@ namespace ExcelUtil
                         centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
                         centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
                         rightFooter = "TARIEF Nr. " + shName;
+                        var fd2 = new FormatData
+                        {
+                            leftHeader = leftHeader,
+                            centerHeader = centerHeader,
+                            rightHeader = rightHeader,
+                            leftFooter = leftFooter,
+                            centerFooterFirst = centerFooterFirst,
+                            centerFooterSecond = centerFooterSecond,
+                            rightFooter = rightFooter,
+                            printArea = parameters.ranges.printArea
+                        };
 
                         // copy sheet
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                         //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], leftHeader, centerHeader, rightHeader, leftFooter, centerFooterFirst, 
-                            centerFooterSecond, rightFooter, parameters.ranges.printArea);
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2);
                     }
 
                     // progress update
@@ -360,16 +390,16 @@ namespace ExcelUtil
             }
         }
 
-        public static void FormatSheet(Worksheet sh, string leftHeader, string centerHeader, string rightHeader, string leftFooter, string centerFooterFirst, string centerFooterSecond, string rightFooter, string printArea)
+        public static void FormatSheet(Worksheet sh, FormatData d)
         {
-            sh.PageSetup.LeftHeader = "&\"Arial\"&12" + leftHeader;
+            sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
             sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
-            sh.PageSetup.RightHeader = "&\"Arial\"&12 " + rightHeader;
-            sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + leftFooter;
-            sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + centerFooterFirst + "\n" + centerFooterSecond + "&B";
-            sh.PageSetup.RightFooter = "&\"Arial\"&12" + rightFooter;
+            sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
+            sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
+            sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
+            sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
 
-            sh.PageSetup.PrintArea = printArea;
+            sh.PageSetup.PrintArea = d.printArea;
 
             sh.PageSetup.Zoom = false;
             sh.PageSetup.FitToPagesWide = 1;
