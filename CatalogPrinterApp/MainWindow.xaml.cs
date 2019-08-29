@@ -131,17 +131,20 @@ namespace CatalogPrinterApp
             parameters.masterCatalog = GetConfigValue("masterCatalog", appSettings);
             parameters.outputPath = GetConfigValue("outputPath", appSettings);
 
-            var ranges = new InputRanges();
-            ranges.catalogType = GetConfigValue("cellCatalogType", appSettings);
-            ranges.btw = GetConfigValue("cellBtw", appSettings);
-            ranges.footerRight = GetConfigValue("cellFooterRight", appSettings);
-            ranges.footerLeft = GetConfigValue("cellFooterLeft", appSettings);
-            ranges.footerMidFirst = GetConfigValue("cellFooterMidFirst", appSettings);
-            ranges.footerMidSecond = GetConfigValue("cellFooterMidSecond", appSettings);
-            ranges.headerRight = GetConfigValue("cellHeaderRight", appSettings);
-            ranges.headerLeft = GetConfigValue("cellHeaderLeft", appSettings);
-            ranges.headerMid = GetConfigValue("cellHeaderMid", appSettings);
-            ranges.printArea = GetConfigValue("printArea", appSettings);
+            var ranges = new InputRanges
+            {
+                catalogType = GetConfigValue("cellCatalogType", appSettings),
+                korting = GetConfigValue("cellKorting", appSettings),
+                btw = GetConfigValue("cellBtw", appSettings),
+                footerRight = GetConfigValue("cellFooterRight", appSettings),
+                footerLeft = GetConfigValue("cellFooterLeft", appSettings),
+                footerMidFirst = GetConfigValue("cellFooterMidFirst", appSettings),
+                footerMidSecond = GetConfigValue("cellFooterMidSecond", appSettings),
+                headerRight = GetConfigValue("cellHeaderRight", appSettings),
+                headerLeft = GetConfigValue("cellHeaderLeft", appSettings),
+                headerMid = GetConfigValue("cellHeaderMid", appSettings),
+                printArea = GetConfigValue("printArea", appSettings)
+            };
             parameters.ranges = ranges;
 
             parameters.sheetSummaryName = GetConfigValue("sheetSummaryName", appSettings);           
@@ -165,11 +168,14 @@ namespace CatalogPrinterApp
                 // get catalog type
                 var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
+                // get korting
+                int.TryParse(InputKorting.Text, out int korting);
+
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
 
                 // print
-                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, false));
+                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, korting, false));
             }
             catch (Exception ex)
             {
@@ -196,11 +202,14 @@ namespace CatalogPrinterApp
                 // get catalog type
                 var catalogType = ((ComboBoxItem)InputCatalogType.SelectedItem).Content.ToString();
 
+                // get korting
+                int.TryParse(InputKorting.Text, out int korting);
+
                 // btw
                 bool inclBtw = InputBTW.IsChecked ?? false;
 
                 // print
-                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw));
+                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, korting));
             }
             catch (Exception ex)
             {
@@ -210,7 +219,7 @@ namespace CatalogPrinterApp
         }
 
         private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, 
-            string catalogType, bool inclBtw, bool printTarieven = true)
+            string catalogType, bool inclBtw, int korting, bool printTarieven = true)
         {              
             // get appconfig parameters
             var parameters = GetConfigParameters();                
@@ -227,7 +236,7 @@ namespace CatalogPrinterApp
 
             // export to pdf
             ExcelUtility.ExportWorkbook2Pdf(progress, parameters, password, catalogType,
-                sheetOrder, inclBtw, printTarieven);
+                sheetOrder, inclBtw, korting, printTarieven);
 
             // progress update
             progress.Report(0);
@@ -241,6 +250,12 @@ namespace CatalogPrinterApp
         private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
         {
             e.Handled = IsTextInputAllowed(e.Text);
+        }
+
+        private void KortingValidationTextBox(object sender, TextCompositionEventArgs e)
+        {
+            int.TryParse(e.Text, out int i);
+            e.Handled = i >= 0 && i <= 100;
         }
     }
 }
