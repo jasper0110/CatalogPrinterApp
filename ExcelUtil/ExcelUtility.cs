@@ -393,12 +393,26 @@ namespace ExcelUtil
 
         public static void FormatSheet(Worksheet sh, FormatData d)
         {
-            sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
+            var name = sh.Name;
+            int.TryParse(name, out int tariefNr);
             sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
-            sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
-            sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
-            sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
-            sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
+
+            if (tariefNr < 500  || tariefNr == 1970 || tariefNr == 1980 || tariefNr == 1990)
+            {
+                sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
+                sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
+                sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
+                sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
+                sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
+            }
+            else
+            {
+                sh.PageSetup.LeftHeader = "";
+                sh.PageSetup.RightHeader = "";
+                sh.PageSetup.LeftFooter = "";
+                sh.PageSetup.CenterFooter = "";
+                sh.PageSetup.RightFooter = "";
+            }
 
             sh.PageSetup.PrintArea = d.printArea;
 
