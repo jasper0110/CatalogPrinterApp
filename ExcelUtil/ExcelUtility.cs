@@ -274,7 +274,7 @@ namespace ExcelUtil
 
                     if (!(printFullCatalog
                         && catalogTypeInt == (int)CatalogType.PARTICULIER
-                        && MasterWb.Sheets[shName].IsDrawingTarief())
+                        && MasterWb.Sheets[shName].IsDrawingTarief()))
                     {
                         // unprotect worksheet
                         MasterWb.Sheets[shName].Unprotect();
