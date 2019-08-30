@@ -190,7 +190,7 @@ namespace CatalogPrinterApp
             }
         }
 
-        private async void PrintSelectionButton_Click(object sender, RoutedEventArgs e)
+        private async void PrintTarievenButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -221,7 +221,7 @@ namespace CatalogPrinterApp
                 bool inclBtw = InputBTW.IsChecked ?? false;
 
                 // print
-                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, korting));
+                await Task.Run(() => PrintCatalog(sheetOrder, progress, catalogType, inclBtw, korting, true));
             }
             catch (Exception ex)
             {
@@ -231,7 +231,7 @@ namespace CatalogPrinterApp
         }
 
         private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, 
-            string catalogType, bool inclBtw, int korting, bool printTarieven = true)
+            string catalogType, bool inclBtw, int korting, bool printTarieven)
         {              
             // get appconfig parameters
             var parameters = GetConfigParameters();                
