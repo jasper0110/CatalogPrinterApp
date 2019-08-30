@@ -160,7 +160,10 @@ namespace ExcelUtil
             if (ExcelUtility.GetWorksheetByName(MasterWb, parameters.sheetSummaryName) == null)
                 throw new Exception($"Sheet " + parameters.sheetSummaryName + " not found in workbook " + MasterWb + "!" +
                     "\nPlease check the name of the summary sheet.");
-            var header = MasterWb.Sheets[parameters.sheetSummaryName].Rows("1:1").Item[1].Value;
+
+            var summarySheet = MasterWb.Sheets[parameters.sheetSummaryName];
+
+            var header = summarySheet.Rows("1:1").Item[1].Value;
             int columnInt = -1;
             for (int i = 1; i <= 100; ++i)
             {
@@ -178,8 +181,8 @@ namespace ExcelUtil
 
             char columnChar = (char)(columnInt + 64);
             string rankRange = columnChar + ":" + columnChar;
-            var sheetRank = MasterWb.Sheets[parameters.sheetSummaryName].Columns(rankRange).Item[1].Value;
-            var sheetName = MasterWb.Sheets[parameters.sheetSummaryName].Columns("A:A").Item[1].Value;
+            var sheetRank = summarySheet.Columns(rankRange).Item[1].Value;
+            var sheetName = summarySheet.Columns("A:A").Item[1].Value;
 
             var sheetOrderDict = new SortedDictionary<int, string>();
             for (int i = 2; i < 1000; ++i)
@@ -274,7 +277,7 @@ namespace ExcelUtil
 
                     if (!(printFullCatalog
                         && catalogTypeInt == (int)CatalogType.PARTICULIER
-                        && MasterWb.Sheets[shName].IsDrawingTarief()))
+                        && (MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief()))
                     {
                         // unprotect worksheet
                         MasterWb.Sheets[shName].Unprotect();
@@ -319,7 +322,7 @@ namespace ExcelUtil
                         // copy sheet
                         if (!printTarieven
                             && catalogTypeInt == (int)CatalogType.PARTICULIER
-                            && !(MasterWb.Sheets[shName].IsDrawingTarief() || MasterWb.Sheets[shName].IsCoverTarief()))
+                            && !((MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief() || (MasterWb.Sheets[shName] as Worksheet).IsCoverTarief()))
                         {
                             // set btw false
                             MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
