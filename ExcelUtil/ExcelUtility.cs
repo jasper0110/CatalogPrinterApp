@@ -20,7 +20,7 @@ namespace ExcelUtil
     }
 
     public struct InputRanges
-    {       
+    {
         public string catalogType;
         public string btw;
         public string korting;
@@ -203,7 +203,7 @@ namespace ExcelUtil
             List<string> sheetOrder,
             bool inclBtw,
             int korting,
-            bool printTarieven = true)
+            bool printTarieven)
         {
             try
             {
@@ -214,10 +214,13 @@ namespace ExcelUtil
                 // open master workbook
                 MasterWb = GetWorkbook(parameters.masterCatalog, password);
 
+                // full catalog or selection
+                bool printFullCatalog = sheetOrder == null;
+
                 // get correct sheet order
                 if(!printTarieven)
                 {
-                    if(sheetOrder != null)
+                    if(!printFullCatalog)
                     {
                         var sheetsToPrint = sheetOrder.Select(x => Int32.Parse(x)).ToList();                        
                         var allSheetOrder = GetSheetOrder(parameters, catalogType);
@@ -269,89 +272,69 @@ namespace ExcelUtil
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
 
-                    // unprotect worksheet
-                    MasterWb.Sheets[shName].Unprotect();
-
-                    // set catalog type
-                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
-                    // set korting
-                    if(korting > 0)
-                        MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
-                    // set btw
-                    if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
+                    if (!(printFullCatalog
+                        && catalogTypeInt == (int)CatalogType.PARTICULIER
+                        && MasterWb.Sheets[shName].IsDrawingTarief())
                     {
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
-                    }
-                    else
-                    {
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
-                    }
+                        // unprotect worksheet
+                        MasterWb.Sheets[shName].Unprotect();
 
-                    // get format data
-                    string leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                    string centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                    string rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                    string leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                    string centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                    string centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                    string rightFooter = "TARIEF Nr. " + shName;
-                    var fd = new FormatData
-                    {
-                        leftHeader = leftHeader,
-                        centerHeader = centerHeader,
-                        rightHeader = rightHeader,
-                        leftFooter = leftFooter,
-                        centerFooterFirst = centerFooterFirst,
-                        centerFooterSecond = centerFooterSecond,
-                        rightFooter = rightFooter,
-                        printArea = parameters.ranges.printArea
-                    };
-
-                    // unhide all columns
-                    MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
-
-                    // copy sheet
-                    MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-
-                    //format sheet
-                    FormatSheet(Wb2Print.Sheets[shName], fd);
-
-                    // copy sheet
-                    if (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER)
-                    {
-                        // set btw false
-                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
-
-                        // get format data
-                        leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "";
-                        centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "";
-                        rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "";
-                        leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "";
-                        centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "";
-                        centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "";
-                        rightFooter = "TARIEF Nr. " + shName;
-                        var fd2 = new FormatData
+                        // set catalog type
+                        MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
+                        // set korting
+                        if (korting > 0)
+                            MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
+                        // set btw
+                        if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
                         {
-                            leftHeader = leftHeader,
-                            centerHeader = centerHeader,
-                            rightHeader = rightHeader,
-                            leftFooter = leftFooter,
-                            centerFooterFirst = centerFooterFirst,
-                            centerFooterSecond = centerFooterSecond,
-                            rightFooter = rightFooter,
+                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
+                        }
+                        else
+                        {
+                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+                        }
+
+                        // get format data                    
+                        var fd = new FormatData
+                        {
+                            leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "",
+                            centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "",
+                            rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "",
+                            leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
+                            centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
+                            centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
+                            rightFooter = "TARIEF Nr. " + shName,
                             printArea = parameters.ranges.printArea
                         };
+
+                        // unhide all columns
+                        MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
 
                         // copy sheet
                         MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
                         //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2);
-                    }
+                        FormatSheet(Wb2Print.Sheets[shName], fd);
 
-                    // progress update
-                    progressSheets += incr;
-                    progress.Report((int)progressSheets);
+                        // copy sheet
+                        if (!printTarieven
+                            && catalogTypeInt == (int)CatalogType.PARTICULIER
+                            && !(MasterWb.Sheets[shName].IsDrawingTarief() || MasterWb.Sheets[shName].IsCoverTarief()))
+                        {
+                            // set btw false
+                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+
+                            // copy sheet
+                            MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+
+                            //format sheet
+                            FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd);
+                        }
+
+                        // progress update
+                        progressSheets += incr;
+                        progress.Report((int)progressSheets);
+                    }
                 }
 
                 // delete default first sheet on creation of workbook
@@ -393,11 +376,11 @@ namespace ExcelUtil
 
         public static void FormatSheet(Worksheet sh, FormatData d)
         {
-            var name = sh.Name;
-            int.TryParse(name, out int tariefNr);
+            sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
+
             sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
 
-            if (tariefNr < 500  || tariefNr == 1970 || tariefNr == 1980 || tariefNr == 1990)
+            if (!sh.IsDrawingTarief())
             {
                 sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
                 sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
