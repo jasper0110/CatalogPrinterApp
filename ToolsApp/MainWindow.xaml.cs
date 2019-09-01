@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace ToolsApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static readonly string _tmpWorkbookDir = @"C:\ProgramData\CatalogPrinter\exports";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -47,6 +50,17 @@ namespace ToolsApp
                     clsProcess.Kill();
                     break;
                 }
+            }
+        }
+
+        private void DeleteExports_OnClick(object sender, RoutedEventArgs e)
+        {
+            var dir = new System.IO.DirectoryInfo(_tmpWorkbookDir);
+            var files = dir.GetFiles();
+            foreach(var file in files)
+            {
+                if (file.Name.StartsWith("export") && file.Name.EndsWith("xlsx"))
+                    File.Delete(file.FullName);
             }
         }
     }

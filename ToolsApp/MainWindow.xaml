@@ -13,6 +13,8 @@
                 <RowDefinition Height="50"></RowDefinition>
                 <RowDefinition Height="1"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="1"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
@@ -38,6 +40,15 @@
                         <TextBlock Name="KillProcessTextBlock" Text="Make sure all Excel windows are closed!" />
                     </Grid>
                     <Button Name="KillExcel" Content="Kill Excell Process" Width="150" Height="36" Margin="0,0,0,32" Click="KillExcel_OnClick" />
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="3" Grid.ColumnSpan="2" Background="{StaticResource MainWindowSplitBorderBrush}"></Grid>
+            <Grid Grid.Row="4" Grid.Column="0">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                    <Grid Margin="10,10,10,10">
+                        <TextBlock Name="DeleteExportsText" Text="" />
+                    </Grid>
+                    <Button Name="DeleteExports" Content="Delete previous Excel exports" Width="170" Height="36" Margin="0,0,0,32" Click="DeleteExports_OnClick" />
                 </StackPanel>
             </Grid>
         </Grid>
