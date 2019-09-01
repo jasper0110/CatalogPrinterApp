@@ -147,7 +147,10 @@ namespace CatalogPrinterApp
             };
             parameters.ranges = ranges;
 
-            parameters.sheetSummaryName = GetConfigValue("sheetSummaryName", appSettings);           
+            parameters.sheetSummaryName = GetConfigValue("sheetSummaryName", appSettings);
+
+            int.TryParse(GetConfigValue("keepExports", appSettings), out int i);
+            parameters.keepExports = i > 0;           
 
             return parameters;
         }

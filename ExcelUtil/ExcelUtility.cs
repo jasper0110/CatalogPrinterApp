@@ -41,6 +41,7 @@ namespace ExcelUtil
         public string outputPath;
         public string hash;
         public string sheetSummaryName;
+        public bool keepExports;
     }
 
     public static class ExcelUtility
@@ -359,9 +360,8 @@ namespace ExcelUtil
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
 
-                //var source = new FileInfo(_tmpWorkbookDir + @"\" + exportWorkbookName);
-                //source.CopyTo(_tmpWorkbookDir + @"\" + exportWorkbookName, true);
-                //File.Delete(_tmpWorkbookDir + @"\" + exportWorkbookName);
+                if(!parameters.keepExports)
+                    File.Delete(_tmpWorkbookDir + @"\" + exportWorkbookName);
 
             }
             catch (Exception ex)
