@@ -45,32 +45,14 @@ namespace ExcelUtil
 
     public static class ExcelUtility
     {
-        public static readonly string _tmpWorkbookDir = @"C:\temp";
-        public static readonly string _tmpWokbookName = @"temp.xlsx";
+        public static readonly string _tmpWorkbookDir = @"C:\ProgramData\CatalogPrinter\exports";
 
         private static Application OpenApplication()
         {
-            try
-            {
-                var excel = (Application)System.Runtime.InteropServices.Marshal.GetActiveObject("Excel.Application");
-                excel.DisplayAlerts = false;
-                excel.Visible = false;
-                return excel;
-            }
-            catch (Exception ex)
-            {
-                if (ex.ToString().Contains("0x800401E3 (MK_E_UNAVAILABLE)"))
-                {
-                    var excel = new Application();
-                    excel.DisplayAlerts = false;
-                    excel.Visible = false;
-                    return excel;
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var excel = new Application();
+            excel.DisplayAlerts = false;
+            excel.Visible = false;
+            return excel;
         }
 
         public static Application XlApp { get; set; } = null;
@@ -79,19 +61,19 @@ namespace ExcelUtil
 
         public static void ChangePassword(string wbFullName, string oldPassword, string newPassword)
         {
-            Workbook wb = ExcelUtility.GetWorkbook(wbFullName, oldPassword);
+            Workbook wb = ExcelUtility.GetWorkbook(wbFullName, false, oldPassword);
             if (wb == null)
                 throw new Exception($"Wrong password for workbook " + wbFullName + "!");
             wb.Password = newPassword;
             ExcelUtility.CloseWorkbook(wb, true);
         }
 
-        public static Workbook GetWorkbook(string fullName, string password = null)
+        public static Workbook GetWorkbook(string fullName, bool readOnly, string password = null)
         {
             try
             {
                 if (password != null)
-                    return XlApp?.Workbooks?.Open(fullName, Password: password);
+                    return XlApp?.Workbooks?.Open(fullName, Password: password, ReadOnly: true);
 
                 return XlApp?.Workbooks?.Open(fullName);
             }
@@ -215,7 +197,7 @@ namespace ExcelUtil
                     XlApp = OpenApplication();
 
                 // open master workbook
-                MasterWb = GetWorkbook(parameters.masterCatalog, password);
+                MasterWb = GetWorkbook(parameters.masterCatalog, true, password);
 
                 // full catalog or selection
                 bool printFullCatalog = sheetOrder == null;
@@ -243,9 +225,10 @@ namespace ExcelUtil
 
                 // open temp workbook to which the sheets of interest are copied to
                 Wb2Print = XlApp?.Workbooks.Add();
+                var exportWorkbookName = $@"export_{DateTime.Now.ToString("yyyyMMdd'T'HH'-'mm'-'ss_fff")}.xlsx";
                 if (!Directory.Exists(_tmpWorkbookDir))
                     Directory.CreateDirectory(_tmpWorkbookDir);
-                Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + _tmpWokbookName);
+                Wb2Print?.SaveAs(_tmpWorkbookDir + @"\" + exportWorkbookName);
 
                 // progress update
                 progress.Report(30);
@@ -275,30 +258,69 @@ namespace ExcelUtil
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
 
-                    if (!(printFullCatalog
-                        && catalogTypeInt == (int)CatalogType.PARTICULIER
-                        && (MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief()))
+                    if (printFullCatalog && (MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief())
+                        continue;
+
+                    /*
+                    * MasterWb manipulations
+                    */
+                    // unprotect worksheet
+                    MasterWb.Sheets[shName].Unprotect();
+                    // unhide all columns
+                    MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
+                    // set catalog type
+                    MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
+                    // set korting
+                    if (korting > 0)
+                        MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
+                    // set btw
+                    if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
                     {
-                        // unprotect worksheet
-                        MasterWb.Sheets[shName].Unprotect();
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
+                    }
+                    else
+                    {
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+                    }
+                    // copy sheet
+                    MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
 
-                        // set catalog type
-                        MasterWb.Sheets[shName].Cells[cellCatalogType.Key, cellCatalogType.Value] = catalogTypeInt;
-                        // set korting
-                        if (korting > 0)
-                            MasterWb.Sheets[shName].Cells[cellKorting.Key, cellKorting.Value] = korting;
-                        // set btw
-                        if (inclBtw || (!printTarieven && catalogTypeInt == (int)CatalogType.PARTICULIER))
-                        {
-                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 1;
-                        }
-                        else
-                        {
-                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
-                        }
+                    /*
+                    * Wb2Print manipulations
+                    */
+                    // get format data                    
+                    var fd = new FormatData
+                    {
+                        leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "",
+                        centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "",
+                        rightHeader = (MasterWb.Sheets[shName].Cells[cellHeaderRight.Key, cellHeaderRight.Value] as Range).Value as string ?? "",
+                        leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
+                        centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
+                        centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
+                        rightFooter = "TARIEF Nr. " + shName,
+                        printArea = parameters.ranges.printArea
+                    };
+                    //format sheet
+                    FormatSheet(Wb2Print.Sheets[shName], fd);
 
-                        // get format data                    
-                        var fd = new FormatData
+                    // copy duplicate sheet
+                    if (!printTarieven
+                        && catalogTypeInt == (int)CatalogType.PARTICULIER
+                        && !((MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief() || (MasterWb.Sheets[shName] as Worksheet).IsCoverTarief()))
+                    {
+                        /*
+                         * MasterWb manipulations
+                         */
+                        // set btw false
+                        MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
+                        // copy sheet
+                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
+
+                        /*
+                         * Wb2Print manipulations
+                         */
+                        // get format data
+                        var fd2 = new FormatData
                         {
                             leftHeader = (MasterWb.Sheets[shName].Cells[cellHeaderLeft.Key, cellHeaderLeft.Value] as Range).Value as string ?? "",
                             centerHeader = (MasterWb.Sheets[shName].Cells[cellHeaderMid.Key, cellHeaderMid.Value] as Range).Value as string ?? "",
@@ -309,37 +331,15 @@ namespace ExcelUtil
                             rightFooter = "TARIEF Nr. " + shName,
                             printArea = parameters.ranges.printArea
                         };
-
-                        // unhide all columns
-                        MasterWb.Sheets[shName].Cells(1, 1).EntireRow.EntireColumn.Hidden = false;
-
-                        // copy sheet
-                        MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-
                         //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName], fd);
-
-                        // copy sheet
-                        if (!printTarieven
-                            && catalogTypeInt == (int)CatalogType.PARTICULIER
-                            && !((MasterWb.Sheets[shName] as Worksheet).IsDrawingTarief() || (MasterWb.Sheets[shName] as Worksheet).IsCoverTarief()))
-                        {
-                            // set btw false
-                            MasterWb.Sheets[shName].Cells[cellBtw.Key, cellBtw.Value] = 2;
-
-                            // copy sheet
-                            MasterWb.Sheets[shName].Copy(After: Wb2Print.Sheets[Wb2Print.Sheets.Count]);
-
-                            //format sheet
-                            FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd);
-                        }
-
-                        // progress update
-                        progressSheets += incr;
-                        progress.Report((int)progressSheets);
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2);
                     }
-                }
 
+                    // progress update
+                    progressSheets += incr;
+                    progress.Report((int)progressSheets);
+                }
+                
                 // delete default first sheet on creation of workbook
                 Wb2Print.Activate();
                 Wb2Print.Worksheets[1].Delete();
@@ -359,9 +359,9 @@ namespace ExcelUtil
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
 
-                var source = new FileInfo(_tmpWorkbookDir + @"\" + _tmpWokbookName);
-                source.CopyTo(_tmpWorkbookDir + @"\_" + _tmpWokbookName, true);
-                File.Delete(_tmpWorkbookDir + @"\" + _tmpWokbookName);
+                //var source = new FileInfo(_tmpWorkbookDir + @"\" + exportWorkbookName);
+                //source.CopyTo(_tmpWorkbookDir + @"\" + exportWorkbookName, true);
+                //File.Delete(_tmpWorkbookDir + @"\" + exportWorkbookName);
 
             }
             catch (Exception ex)
@@ -370,8 +370,7 @@ namespace ExcelUtil
                     CloseWorkbook(MasterWb, false);
                 if(Wb2Print != null)
                     CloseWorkbook(Wb2Print, true);
-                //File.Delete(_tmpWorkbookDir + _tmpWokbookName);
-
+   
                 CloseExcel();
                 throw new Exception(ex.Message);
             }
@@ -381,9 +380,10 @@ namespace ExcelUtil
         {
             sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
 
-            sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
+            if(!sh.IsCoverTarief())
+                sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
 
-            if (!sh.IsDrawingTarief())
+            if (!sh.IsDrawingTarief() && !sh.IsCoverTarief())
             {
                 sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
                 sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
