@@ -302,7 +302,7 @@ namespace ExcelUtil
                         printArea = parameters.ranges.printArea
                     };
                     //format sheet
-                    FormatSheet(Wb2Print.Sheets[shName], fd);
+                    FormatSheet(Wb2Print.Sheets[shName], fd, catalogTypeInt, korting);
 
                     // copy duplicate sheet
                     if (!printTarieven
@@ -333,7 +333,7 @@ namespace ExcelUtil
                             printArea = parameters.ranges.printArea
                         };
                         //format sheet
-                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2);
+                        FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2, catalogTypeInt, korting);
                     }
 
                     // progress update
@@ -376,7 +376,7 @@ namespace ExcelUtil
             }
         }
 
-        public static void FormatSheet(Worksheet sh, FormatData d)
+        public static void FormatSheet(Worksheet sh, FormatData d, int catalogType, int korting)
         {
             sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
 
@@ -389,6 +389,14 @@ namespace ExcelUtil
                 sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
                 sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
                 sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
+                sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
+            }
+            else if (catalogType == (int)CatalogType.PARTICULIER && korting <= 0)
+            {
+                sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
+                sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
+                sh.PageSetup.LeftFooter = "";
+                sh.PageSetup.CenterFooter = "";
                 sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
             }
             else
