@@ -387,17 +387,18 @@ namespace ExcelUtil
             {
                 sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
                 sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
-                sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
-                sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
                 sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
-            }
-            else if (catalogType == (int)CatalogType.PARTICULIER && korting <= 0)
-            {
-                sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
-                sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
-                sh.PageSetup.LeftFooter = "";
-                sh.PageSetup.CenterFooter = "";
-                sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
+
+                if(catalogType == (int)CatalogType.PARTICULIER && korting <= 0)
+                {
+                    sh.PageSetup.LeftFooter = "";
+                    sh.PageSetup.CenterFooter = "";
+                }
+                else
+                {
+                    sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
+                    sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
+                }
             }
             else
             {
