@@ -381,7 +381,7 @@ namespace ExcelUtil
             sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
 
             if(!sh.IsCoverTarief())
-                sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P/&N";
+                sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P";
 
             if (!sh.IsDrawingTarief() && !sh.IsCoverTarief())
             {
