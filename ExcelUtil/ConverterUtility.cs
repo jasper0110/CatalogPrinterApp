@@ -35,21 +35,29 @@ namespace ExcelUtil
             return list;
         }
 
-        public static List<string> MultipleRange2List(string sheetInput)
+        public static Dictionary<int, string> MultipleRange2List(string sheetInput)
         {
-            var sheets2Print = new List<string>();
+            var sheets2Print = new Dictionary<int, string>();
 
+            var index = 0;
             var sheets = sheetInput.Split(';').ToList();
             foreach (var sheet in sheets)
             {
                 if (sheet.Contains("-"))
                 {
-                    sheets2Print.AddRange(Range2List(sheet));
+                    foreach (var str in Range2List(sheet))
+                    {
+                        sheets2Print.Add(index, str);
+                        index++;
+                    }
                 }
                 else
                 {
                     if (sheet.Length > 0)
-                        sheets2Print.Add(sheet);
+                    {
+                        sheets2Print.Add(index, sheet);
+                        index++;
+                    }
                 }
             }
             return sheets2Print;

@@ -136,7 +136,7 @@ namespace ExcelUtil
             return false;
         }
 
-        public static List<string> GetSheetOrder(AppParameters parameters, string catalogType)
+        public static Dictionary<int, string> GetSheetOrder(AppParameters parameters, string catalogType)
         {
             var sheetOrder = new List<string>();
 
@@ -177,16 +177,15 @@ namespace ExcelUtil
                 if (rank > 0 && name != null)
                     sheetOrderDict[rank] = name;
             }
-            sheetOrder = sheetOrderDict.Values.ToList();
 
-            return sheetOrder;
+            return sheetOrderDict.ToDictionary(x => x.Key, x => x.Value);
         }
 
         public static void ExportWorkbook2Pdf(IProgress<int> progress, 
             AppParameters parameters, 
             string password, 
             string catalogType, 
-            List<string> sheetOrder,
+            Dictionary<int, string> sheetOrder,
             bool inclBtw,
             int korting,
             bool printTarieven)
@@ -203,24 +202,30 @@ namespace ExcelUtil
                 // full catalog or selection
                 bool printFullCatalog = sheetOrder == null;
 
+                var allSheetOrder = GetSheetOrder(parameters, catalogType);
                 // get correct sheet order
-                if(!printTarieven)
+                if (!printTarieven)
                 {
                     if(!printFullCatalog)
                     {
-                        var sheetsToPrint = sheetOrder.Select(x => Int32.Parse(x)).ToList();                        
-                        var allSheetOrder = GetSheetOrder(parameters, catalogType);
-                        if (sheetsToPrint.Max() > allSheetOrder.Count)
+                        var sheetsToPrint = sheetOrder;
+                        if (sheetsToPrint.Select(x => Int32.Parse(x.Value)).Max() > allSheetOrder.Count)
                         {
                             throw new Exception($"Attempting to print page number {sheetsToPrint.Max()}, " +
                                 $"but only found {allSheetOrder.Count} given sheets.");
                         }
-                        sheetOrder = sheetsToPrint.Select(x => allSheetOrder[x-1]).ToList();
+                        sheetOrder = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Value))
+                            .ToDictionary(x => x.Key, x => x.Value);
                     }
                     else
                     {
                         sheetOrder = GetSheetOrder(parameters, catalogType);
                     }
+                }
+                else
+                {
+                    sheetOrder = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Value))
+                            .ToDictionary(x => x.Key, x => x.Value);
                 }
                                
 
@@ -253,8 +258,10 @@ namespace ExcelUtil
                 double incr = 70.0 / (double)sheetOrder.Count;
 
                 // copy necessary sheets to temp workbook and put sheets in correct order
-                foreach (var shName in sheetOrder)
+                foreach (var item in sheetOrder)
                 {
+                    var shName = item.Value;
+
                     if (ExcelUtility.GetWorksheetByName(MasterWb, shName) == null)
                         throw new Exception($"Sheet " + shName + " not found in workbook " + MasterWb + "!" +
                             "\nPlease check the sheet order input.");
@@ -298,7 +305,7 @@ namespace ExcelUtil
                         leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
                         centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
                         centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
-                        rightFooter = "TARIEF Nr. " + shName,
+                        rightFooter = "TARIEF Nr. " + shName + " / " + item.Key,
                         printArea = parameters.ranges.printArea
                     };
                     //format sheet
@@ -329,7 +336,7 @@ namespace ExcelUtil
                             leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
                             centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
                             centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
-                            rightFooter = "TARIEF Nr. " + shName,
+                            rightFooter = "TARIEF Nr. " + shName + " / " + item.Key,
                             printArea = parameters.ranges.printArea
                         };
                         //format sheet
@@ -380,23 +387,23 @@ namespace ExcelUtil
         {
             sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
 
-            if(!sh.IsCoverTarief())
-                sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P";
+            //if(!sh.IsCoverTarief())
+            //    sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P";
+            sh.PageSetup.CenterHeader = "";
 
             if (!sh.IsDrawingTarief() && !sh.IsCoverTarief())
             {
                 sh.PageSetup.LeftHeader = "&\"Arial\"&12" + d.leftHeader;
                 sh.PageSetup.RightHeader = "&\"Arial\"&12 " + d.rightHeader;
                 sh.PageSetup.RightFooter = "&\"Arial\"&12" + d.rightFooter;
+                sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
 
-                if(catalogType == (int)CatalogType.PARTICULIER && korting <= 0)
+                if (catalogType == (int)CatalogType.PARTICULIER && korting <= 0)
                 {
-                    sh.PageSetup.LeftFooter = "";
                     sh.PageSetup.CenterFooter = "";
                 }
                 else
                 {
-                    sh.PageSetup.LeftFooter = "&\"Arial\"&12 " + d.leftFooter;
                     sh.PageSetup.CenterFooter = "&B&\"Arial\"&16" + d.centerFooterFirst + "\n" + d.centerFooterSecond + "&B";
                 }
             }

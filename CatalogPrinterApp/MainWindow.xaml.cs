@@ -160,7 +160,7 @@ namespace CatalogPrinterApp
             try
             {
                 // pages to print
-                List<string> sheetOrder = null;
+                Dictionary<int, string> sheetOrder = null;
                 string sheetInput = InputPages.Text;
                 if (InputPages.Text.Length > 0)
                     sheetOrder = ConverterUtility.MultipleRange2List(sheetInput);
@@ -233,7 +233,7 @@ namespace CatalogPrinterApp
             }
         }
 
-        private void PrintCatalog(List<string> sheetOrder, IProgress<int> progress, 
+        private void PrintCatalog(Dictionary<int, string> sheetOrder, IProgress<int> progress, 
             string catalogType, bool inclBtw, int korting, bool printTarieven)
         {              
             // get appconfig parameters
