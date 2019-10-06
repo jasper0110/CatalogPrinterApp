@@ -216,12 +216,12 @@ namespace ExcelUtil
                             throw new Exception($"Attempting to print page number {sheetsToPrint.Max()}, " +
                                 $"but only found {allSheetOrder.Count} given sheets.");
                         }
-                        sheetOrder = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Value))
+                        sheetOrder = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Key.ToString()))
                             .ToDictionary(x => x.Key, x => x.Value);
                     }
                     else
                     {
-                        sheetOrder = GetSheetOrder(parameters, catalogType);
+                        sheetOrder = allSheetOrder;
                     }
                 }
                 else
