@@ -16,5 +16,6 @@ namespace ExcelUtil
         public string centerFooterSecond;
         public string rightFooter;
         public string printArea;
+        public bool landscape;
     }
 }

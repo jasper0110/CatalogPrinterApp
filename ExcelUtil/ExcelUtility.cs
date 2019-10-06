@@ -42,6 +42,7 @@ namespace ExcelUtil
         public string hash;
         public string sheetSummaryName;
         public bool keepExports;
+        public List<string> landscapePages;
     }
 
     public static class ExcelUtility
@@ -105,6 +106,7 @@ namespace ExcelUtil
             {
                 XlApp.Quit();
                 Marshal.ReleaseComObject(XlApp);
+                XlApp = null;
             }
         }
 
@@ -223,9 +225,17 @@ namespace ExcelUtil
                     }
                 }
                 else
-                {
-                    sheetOrder = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Value))
+                {                    
+                    var sheetOrderTemp = allSheetOrder.Where(x => sheetOrder.ContainsValue(x.Value))
                             .ToDictionary(x => x.Key, x => x.Value);
+                    foreach(var item in sheetOrder)
+                    {
+                        if(!sheetOrderTemp.ContainsValue(item.Value))
+                            throw new Exception($"Could not find sheet name " + item.Value + " in " + parameters.sheetSummaryName +
+                                " for catalog type " + catalogType + " or it has been overwritten." +
+                            "\nPlease check the sheet order input.");
+                    }
+                    sheetOrder = sheetOrderTemp;
                 }
                                
 
@@ -305,8 +315,9 @@ namespace ExcelUtil
                         leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
                         centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
                         centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
-                        rightFooter = "TARIEF Nr. " + shName + " / " + item.Key,
-                        printArea = parameters.ranges.printArea
+                        rightFooter = "TARIEF Nr. " + shName + " / PG " + item.Key,
+                        printArea = parameters.ranges.printArea,
+                        landscape = parameters.landscapePages.Contains(shName) ? true : false
                     };
                     //format sheet
                     FormatSheet(Wb2Print.Sheets[shName], fd, catalogTypeInt, korting);
@@ -336,8 +347,9 @@ namespace ExcelUtil
                             leftFooter = (MasterWb.Sheets[shName].Cells[cellFooterLeft.Key, cellFooterLeft.Value] as Range).Value as string ?? "",
                             centerFooterFirst = (MasterWb.Sheets[shName].Cells[cellFooterMidFirst.Key, cellFooterMidFirst.Value] as Range).Value as string ?? "",
                             centerFooterSecond = (MasterWb.Sheets[shName].Cells[cellFooterMidSecond.Key, cellFooterMidSecond.Value] as Range).Value as string ?? "",
-                            rightFooter = "TARIEF Nr. " + shName + " / " + item.Key,
-                            printArea = parameters.ranges.printArea
+                            rightFooter = "TARIEF Nr. " + shName + " / PG " + item.Key,
+                            printArea = parameters.ranges.printArea,
+                            landscape = parameters.landscapePages.Contains(shName) ? true : false
                         };
                         //format sheet
                         FormatSheet(Wb2Print.Sheets[shName + " (2)"], fd2, catalogTypeInt, korting);
@@ -347,22 +359,29 @@ namespace ExcelUtil
                     progressSheets += incr;
                     progress.Report((int)progressSheets);
                 }
-                
-                // delete default first sheet on creation of workbook
-                Wb2Print.Activate();
-                Wb2Print.Worksheets[1].Delete();
 
-                // print sheets
-                string outputFile = parameters.outputPath + @"\catalog.pdf";
-                if (File.Exists(outputFile) && ExcelUtility.IsFileInUse(outputFile))
-                    throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
-                if (!Directory.Exists(parameters.outputPath))
-                    Directory.CreateDirectory(parameters.outputPath);
+                if (sheetOrder.Count > 0)
+                {
+                    // delete default first sheet on creation of workbook
+                    Wb2Print.Activate();
+                    Wb2Print.Worksheets[1].Delete();
+
+                    // print sheets
+                    string outputFile = parameters.outputPath + @"\catalog.pdf";
+                    if (File.Exists(outputFile) && ExcelUtility.IsFileInUse(outputFile))
+                        throw new Exception(outputFile + " is open, please close it and press 'Print' again.");
+                    if (!Directory.Exists(parameters.outputPath))
+                        Directory.CreateDirectory(parameters.outputPath);
+
+                    Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
+                }
+                else
+                {
+                    throw new Exception("No sheets found to print. Please check the input.");
+                }
 
                 // progress update
                 progress.Report(100);
-
-                Wb2Print.ExportAsFixedFormat(XlFixedFormatType.xlTypePDF, outputFile, OpenAfterPublish: true);
 
                 ExcelUtility.CloseWorkbook(MasterWb, false);
                 ExcelUtility.CloseWorkbook(Wb2Print, true);
@@ -385,7 +404,10 @@ namespace ExcelUtil
 
         public static void FormatSheet(Worksheet sh, FormatData d, int catalogType, int korting)
         {
-            sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
+            if(d.landscape)
+                sh.PageSetup.Orientation = XlPageOrientation.xlLandscape;
+            else
+                sh.PageSetup.Orientation = XlPageOrientation.xlPortrait;
 
             //if(!sh.IsCoverTarief())
             //    sh.PageSetup.CenterHeader = "&\"Arial\"&12" + "&P";

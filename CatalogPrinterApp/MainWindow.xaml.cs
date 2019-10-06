@@ -150,7 +150,10 @@ namespace CatalogPrinterApp
             parameters.sheetSummaryName = GetConfigValue("sheetSummaryName", appSettings);
 
             int.TryParse(GetConfigValue("keepExports", appSettings), out int i);
-            parameters.keepExports = i > 0;           
+            parameters.keepExports = i > 0;
+
+            var landscapePagesInput = GetConfigValue("landscapeTarieven", appSettings);
+            parameters.landscapePages = ConverterUtility.MultipleRange2List(landscapePagesInput).Values.ToList();
 
             return parameters;
         }
